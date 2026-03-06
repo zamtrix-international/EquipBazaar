@@ -1,0 +1,13 @@
+const WALLET_ENTRY_TYPE = Object.freeze({
+  CREDIT: "CREDIT",
+  DEBIT: "DEBIT",
+});
+
+const WALLET_REF_TYPE = Object.freeze({
+  BOOKING: "BOOKING",
+  PAYOUT: "PAYOUT",
+  ADJUSTMENT: "ADJUSTMENT",
+  PENALTY: "PENALTY",
+});
+
+module.exports = { WALLET_ENTRY_TYPE, WALLET_REF_TYPE };
