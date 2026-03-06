@@ -1,53 +1,35 @@
-/**
- * Booking Pricing Service
- * Calculates pricing, taxes, discounts, and commissions
- */
+const { Equipment, CommissionRule } = require("../models");
 
-const CommissionRule = require('../models/CommissionRule');
-const apiError = require('../utils/apiError');
-
-/**
- * Calculate booking price
- */
 const calculateBookingPrice = async (equipmentId, days, vendorId) => {
-  // TODO: Get equipment daily rate from Equipment model
-  const basePrice = 1000 * days; // Placeholder
 
-  const commissionRule = await CommissionRule.findOne({
-    where: { vendorId },
+  const equipment = await Equipment.findByPk(equipmentId);
+
+  if (!equipment) {
+    throw new Error("Equipment not found");
+  }
+
+  const basePrice = equipment.dailyRate * days;
+
+  const rule = await CommissionRule.findOne({
+    where: { vendorId }
   });
 
-  const commissionRate = commissionRule ? commissionRule.commissionRate : 0.1; // 10% default
+  const commissionRate = rule ? rule.commissionRate : 0.1;
+
   const commission = basePrice * commissionRate;
-  const totalAmount = basePrice + commission;
+
+  const subtotal = basePrice + commission;
+
+  const gst = subtotal * 0.18;
 
   return {
     basePrice,
     commission,
-    commissionRate: commissionRate * 100,
-    totalAmount,
+    gst,
+    totalAmount: subtotal + gst
   };
 };
 
-/**
- * Apply coupon/discount
- */
-const applyDiscount = async (totalAmount, discountCode) => {
-  // TODO: Implement discount logic
-  return totalAmount;
-};
-
-/**
- * Calculate tax
- */
-const calculateTax = async (amount, state) => {
-  // TODO: Implement GST calculation based on state
-  const taxRate = 0.18; // 18% GST default
-  return amount * taxRate;
-};
-
 module.exports = {
-  calculateBookingPrice,
-  applyDiscount,
-  calculateTax,
+  calculateBookingPrice
 };

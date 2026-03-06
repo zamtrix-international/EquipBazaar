@@ -1,80 +1,62 @@
-/**
- * Payment Service
- * Handles payment operations, initiations, and verifications
- */
+const crypto = require("crypto");
 
-const Payment = require('../models/Payment');
-const PaymentWebhookLog = require('../models/PaymentWebhookLog');
-const Booking = require('../models/Booking');
-const apiError = require('../utils/apiError');
+const Payment = require("../models/Payment");
+const Booking = require("../models/Booking");
+const PaymentWebhookLog = require("../models/PaymentWebhookLog");
 
-/**
- * Initiate payment
- */
+const ApiError = require("../utils/apiError");
+
 const initiatePayment = async (bookingId, paymentData) => {
+
   const booking = await Booking.findByPk(bookingId);
+
   if (!booking) {
-    throw new apiError(404, 'Booking not found');
+    throw new ApiError(404, "Booking not found");
   }
 
-  return await Payment.create({
+  const payment = await Payment.create({
     bookingId,
     ...paymentData,
-    status: 'INITIATED',
+    status: "CREATED"
   });
-};
 
-/**
- * Get payment by ID
- */
-const getPaymentById = async (paymentId) => {
-  const payment = await Payment.findByPk(paymentId);
-  if (!payment) {
-    throw new apiError(404, 'Payment not found');
-  }
   return payment;
 };
 
-/**
- * Verify payment
- */
+
 const verifyPayment = async (paymentId, gatewayResponse) => {
-  const payment = await getPaymentById(paymentId);
 
-  // TODO: Validate gateway response signature
-  // const isValid = validateGatewaySignature(gatewayResponse);
+  const payment = await Payment.findByPk(paymentId);
 
-  if (gatewayResponse.status === 'SUCCESS') {
-    payment.status = 'SUCCESS';
-    payment.transactionId = gatewayResponse.transactionId;
-    await payment.save();
-  } else {
-    payment.status = 'FAILED';
+  if (!payment) {
+    throw new ApiError(404, "Payment not found");
   }
+
+  const { orderId, paymentId: gatewayPaymentId, signature } = gatewayResponse;
+
+  const generatedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update(orderId + "|" + gatewayPaymentId)
+    .digest("hex");
+
+  if (generatedSignature !== signature) {
+    throw new ApiError(400, "Invalid payment signature");
+  }
+
+  payment.status = "SUCCESS";
+  payment.transactionId = gatewayPaymentId;
+
+  await payment.save();
 
   return payment;
 };
 
-/**
- * Log webhook
- */
-const logWebhook = async (webhookData) => {
-  return await PaymentWebhookLog.create(webhookData);
-};
-
-/**
- * Get booking payments
- */
-const getBookingPayments = async (bookingId) => {
-  return await Payment.findAll({
-    where: { bookingId },
-  });
+const logWebhook = async (data) => {
+  return await PaymentWebhookLog.create(data);
 };
 
 module.exports = {
   initiatePayment,
-  getPaymentById,
   verifyPayment,
-  logWebhook,
-  getBookingPayments,
+  logWebhook
 };

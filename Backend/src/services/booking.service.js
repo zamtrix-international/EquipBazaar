@@ -1,93 +1,90 @@
-/**
- * Booking Service
- * Handles core booking operations and lifecycle
- */
+const { Booking, BookingStatusLog, Equipment, VendorProfile } = require("../models");
+const { Op } = require("sequelize");
+const ApiError = require("../utils/apiError");
 
-const Booking = require('../models/Booking');
-const BookingStatusLog = require('../models/BookingStatusLog');
-const Equipment = require('../models/Equipment');
-const User = require('../models/User');
-const apiError = require('../utils/apiError');
-const { Op } = require('sequelize');
-
-/**
- * Create booking
- */
-const createBooking = async (bookingData) => {
-  const booking = await Booking.create(bookingData);
-  await BookingStatusLog.create({
-    bookingId: booking.id,
-    status: booking.status,
-    reason: 'Booking created',
-  });
-  return booking;
+const VALID_TRANSITIONS = {
+  REQUESTED: ["ACCEPTED", "REJECTED", "CANCELLED"],
+  ACCEPTED: ["PAID", "CANCELLED"],
+  PAID: ["ON_THE_WAY", "CANCELLED"],
+  ON_THE_WAY: ["WORK_STARTED"],
+  WORK_STARTED: ["DELIVERED"],
+  DELIVERED: ["COMPLETED", "DISPUTED"],
 };
 
-/**
- * Get booking by ID
- */
-const getBookingById = async (bookingId) => {
-  const booking = await Booking.findByPk(bookingId, {
-    include: [
-      { model: Equipment, as: 'equipment' },
-      { model: User, as: 'customer' },
-      { model: User, as: 'vendor' },
-      { model: BookingStatusLog, as: 'statusLogs' },
-    ],
+const getAvailableEquipment = async (startDate, endDate) => {
+
+  const booked = await Booking.findAll({
+    where: {
+      serviceDate: {
+        [Op.between]: [startDate, endDate]
+      },
+      status: {
+        [Op.notIn]: ["CANCELLED", "REJECTED"]
+      }
+    },
+    attributes: ["equipmentId"]
   });
-  if (!booking) {
-    throw new apiError(404, 'Booking not found');
+
+  const bookedIds = booked.map(b => b.equipmentId);
+
+  return Equipment.findAll({
+    where: {
+      id: { [Op.notIn]: bookedIds },
+      isActive: true
+    }
+  });
+};
+
+const getUserBookings = async (userId, role) => {
+
+  if (role === "VENDOR") {
+
+    const vendor = await VendorProfile.findOne({
+      where: { userId }
+    });
+
+    if (!vendor) {
+      throw new ApiError(404, "Vendor profile not found");
+    }
+
+    return Booking.findAll({
+      where: { vendorId: vendor.id }
+    });
   }
-  return booking;
-};
 
-/**
- * Get user bookings
- */
-const getUserBookings = async (userId, role, page = 1, limit = 10) => {
-  const offset = (page - 1) * limit;
-  const where = role === 'VENDOR' ? { vendorId: userId } : { customerId: userId };
-  return await Booking.findAndCountAll({
-    where,
-    offset,
-    limit,
+  return Booking.findAll({
+    where: { customerId: userId }
   });
 };
 
-/**
- * Update booking status
- */
-const updateBookingStatus = async (bookingId, newStatus, reason = '') => {
-  const booking = await getBookingById(bookingId);
+const updateBookingStatus = async (bookingId, newStatus) => {
+
+  const booking = await Booking.findByPk(bookingId);
+
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+
+  const allowed = VALID_TRANSITIONS[booking.status] || [];
+
+  if (!allowed.includes(newStatus)) {
+    throw new ApiError(400, `Invalid transition ${booking.status} → ${newStatus}`);
+  }
+
   booking.status = newStatus;
+
   await booking.save();
 
   await BookingStatusLog.create({
     bookingId,
-    status: newStatus,
-    reason,
+    status: newStatus
   });
 
   return booking;
 };
 
-/**
- * Get available equipment for date range
- */
-const getAvailableEquipment = async (startDate, endDate, page = 1, limit = 10) => {
-  // TODO: Filter equipment not booked for date range
-  const offset = (page - 1) * limit;
-  return await Equipment.findAndCountAll({
-    where: { isActive: true },
-    offset,
-    limit,
-  });
-};
-
 module.exports = {
-  createBooking,
-  getBookingById,
-  getUserBookings,
-  updateBookingStatus,
   getAvailableEquipment,
+  getUserBookings,
+  updateBookingStatus
 };
