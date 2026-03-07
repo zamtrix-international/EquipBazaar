@@ -2,12 +2,10 @@
  * Vendor Service
  * Handles vendor management, KYC, and account operations
  */
-
-const VendorProfile = require('../models/VendorProfile');
-const VendorKycDocument = require('../models/VendorKycDocument');
-const VendorBankAccount = require('../models/VendorBankAccount');
-const User = require('../models/User');
-const apiError = require('../utils/apiError');
+const VendorProfile = require("../models/VendorProfile");
+const VendorKycDocument = require("../models/VendorKycDocument");
+const VendorBankAccount = require("../models/VendorBankAccount");
+const { ApiError } = require("../utils/apiError");
 
 /**
  * Create vendor profile
@@ -17,6 +15,7 @@ const createVendorProfile = async (userId, vendorData) => {
     userId,
     ...vendorData,
   });
+
   return vendor;
 };
 
@@ -26,13 +25,21 @@ const createVendorProfile = async (userId, vendorData) => {
 const getVendorProfile = async (vendorId) => {
   const vendor = await VendorProfile.findByPk(vendorId, {
     include: [
-      { model: VendorKycDocument, as: 'kycDocuments' },
-      { model: VendorBankAccount, as: 'bankAccounts' },
+      {
+        model: VendorKycDocument,
+        as: "kycDocuments",
+      },
+      {
+        model: VendorBankAccount,
+        as: "bankAccounts",
+      },
     ],
   });
+
   if (!vendor) {
-    throw new apiError(404, 'Vendor not found');
+    throw new ApiError(404, "Vendor not found");
   }
+
   return vendor;
 };
 
@@ -49,7 +56,9 @@ const updateVendorProfile = async (vendorId, updateData) => {
  * Upload KYC document
  */
 const uploadKycDocument = async (vendorId, documentData) => {
-  return await VendorKycDocument.create({
+  await getVendorProfile(vendorId);
+
+  return VendorKycDocument.create({
     vendorId,
     ...documentData,
   });
@@ -59,7 +68,9 @@ const uploadKycDocument = async (vendorId, documentData) => {
  * Add bank account
  */
 const addBankAccount = async (vendorId, bankData) => {
-  return await VendorBankAccount.create({
+  await getVendorProfile(vendorId);
+
+  return VendorBankAccount.create({
     vendorId,
     ...bankData,
   });
