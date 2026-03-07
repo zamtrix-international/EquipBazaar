@@ -1,5 +1,4 @@
 const multer = require("multer");
-const path = require("path");
 const { ensureLocalUploadDir } = require("../config/storage");
 const { safeFileName } = require("../utils/fileUpload");
 
@@ -11,16 +10,26 @@ const storage = multer.diskStorage({
 });
 
 function fileFilter(req, file, cb) {
-  // allow images + pdf
-  const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-  if (!allowed.includes(file.mimetype)) return cb(new Error("Unsupported file type"), false);
+  const allowed = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+  ];
+
+  if (!allowed.includes(file.mimetype)) {
+    return cb(new Error("Unsupported file type"), false);
+  }
+
   cb(null, true);
 }
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+  limits: {
+    fileSize: 8 * 1024 * 1024,
+  },
 });
 
 module.exports = { upload };
