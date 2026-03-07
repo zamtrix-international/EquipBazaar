@@ -4,9 +4,8 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 const { corsOptions } = require("./config/cors");
-const { rateLimiter } = require('./middlewares/rateLimit.middleware');
-const { errorHandler } = require("./middlewares/error.middleware");
-const { notFoundHandler } = require("./middlewares/error.middleware");
+const { rateLimiter } = require("./middlewares/rateLimit.middleware");
+const { errorHandler, notFoundHandler } = require("./middlewares/error.middleware");
 const { logger } = require("./utils/logger");
 const routes = require("./routes");
 
@@ -39,12 +38,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// NOTE: Routes will be mounted here later (auth, users, vendors, etc.)
-// Example:
-// const routes = require("./routes");
-// app.use("/api", routes);
-// app.use("/api/auth", require("./routes/auth.routes"));
-// app.use("/api/vendors", require("./routes/vendor.routes"));
+// API routes
+app.use("/api", routes);
 
 // 404 + Error handler
 app.use(notFoundHandler);
