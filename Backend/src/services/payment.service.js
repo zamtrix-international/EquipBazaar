@@ -3,6 +3,7 @@
  * Handles payment operations, initiations, and verifications
  */
 
+const { UniqueConstraintError } = require("sequelize");
 const Payment = require("../models/Payment");
 const PaymentWebhookLog = require("../models/PaymentWebhookLog");
 const Booking = require("../models/Booking");
@@ -98,14 +99,22 @@ const logWebhook = async ({ gateway, event, payload, status = "RECEIVED", idempo
   const existing = await PaymentWebhookLog.findOne({ where: { idempotencyKey: finalIdempotencyKey } });
   if (existing) return existing;
 
-  return PaymentWebhookLog.create({
-    gateway,
-    eventType: event,
-    payloadJson: JSON.stringify(payload || {}),
-    processed: status === "PROCESSED",
-    processingNote: status,
-    idempotencyKey: finalIdempotencyKey,
-  });
+  try {
+    return await PaymentWebhookLog.create({
+      gateway,
+      eventType: event,
+      payloadJson: JSON.stringify(payload || {}),
+      processed: status === "PROCESSED",
+      processingNote: status,
+      idempotencyKey: finalIdempotencyKey,
+    });
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      return PaymentWebhookLog.findOne({ where: { idempotencyKey: finalIdempotencyKey } });
+    }
+
+    throw error;
+  }
 };
 
 const markWebhookProcessed = async (logId, note = "PROCESSED") => {
