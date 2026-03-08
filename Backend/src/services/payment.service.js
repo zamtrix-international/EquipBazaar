@@ -1,116 +1,118 @@
-const crypto = require("crypto");
+/**
+ * Payment Service
+ * Handles payment operations, initiations, and verifications
+ */
 
-<<<<<<< HEAD
 const Payment = require("../models/Payment");
-const Booking = require("../models/Booking");
 const PaymentWebhookLog = require("../models/PaymentWebhookLog");
-
+const Booking = require("../models/Booking");
 const ApiError = require("../utils/apiError");
-=======
-const Payment = require('../models/Payment');
-const PaymentWebhookLog = require('../models/PaymentWebhookLog');
-const Booking = require('../models/Booking');
-const ApiError = require('../utils/apiError');
->>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
 
+/**
+ * Initiate payment
+ */
 const initiatePayment = async (bookingId, paymentData) => {
-
   const booking = await Booking.findByPk(bookingId);
-
   if (!booking) {
-<<<<<<< HEAD
     throw new ApiError(404, "Booking not found");
-  }
-
-  const payment = await Payment.create({
-    bookingId,
-    ...paymentData,
-    status: "CREATED"
-=======
-    throw new ApiError(404, 'Booking not found');
   }
 
   return Payment.create({
     bookingId,
     ...paymentData,
-    status: 'PENDING',
->>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
+    status: "PENDING",
   });
+};
 
-<<<<<<< HEAD
-=======
 /**
  * Get payment by ID
  */
 const getPaymentById = async (paymentId) => {
   const payment = await Payment.findByPk(paymentId);
   if (!payment) {
-    throw new ApiError(404, 'Payment not found');
-  }
->>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
-  return payment;
-};
-
-
-const verifyPayment = async (paymentId, gatewayResponse) => {
-
-<<<<<<< HEAD
-  const payment = await Payment.findByPk(paymentId);
-
-  if (!payment) {
     throw new ApiError(404, "Payment not found");
   }
-
-  const { orderId, paymentId: gatewayPaymentId, signature } = gatewayResponse;
-
-  const generatedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_SECRET)
-    .update(orderId + "|" + gatewayPaymentId)
-    .digest("hex");
-
-  if (generatedSignature !== signature) {
-    throw new ApiError(400, "Invalid payment signature");
-  }
-
-  payment.status = "SUCCESS";
-  payment.transactionId = gatewayPaymentId;
-
-  await payment.save();
-
-  return payment;
-};
-
-const logWebhook = async (data) => {
-  return await PaymentWebhookLog.create(data);
-=======
-  if (gatewayResponse.status === 'SUCCESS') {
-    payment.status = 'SUCCESS';
-    payment.gatewayPaymentId = gatewayResponse.paymentId || gatewayResponse.transactionId || payment.gatewayPaymentId;
-    payment.gatewaySignature = gatewayResponse.signature || payment.gatewaySignature;
-    payment.paidAt = new Date();
-  } else {
-    payment.status = 'FAILED';
-  }
-
-  await payment.save();
   return payment;
 };
 
 /**
- * Log webhook
+ * Verify payment
  */
-const logWebhook = async ({ gateway, event, payload, status = 'RECEIVED', idempotencyKey }) => {
+const verifyPayment = async (paymentId, gatewayResponse) => {
+  const payment = await getPaymentById(paymentId);
+
+  if (gatewayResponse.status === "SUCCESS") {
+    payment.status = "SUCCESS";
+    payment.gatewayPaymentId = gatewayResponse.paymentId || gatewayResponse.transactionId || payment.gatewayPaymentId;
+    payment.gatewaySignature = gatewayResponse.signature || payment.gatewaySignature;
+    payment.paidAt = new Date();
+
+    await Booking.update(
+      { status: "PAID" },
+      { where: { id: payment.bookingId, status: ["REQUESTED", "ACCEPTED"] } }
+    );
+  } else {
+    payment.status = "FAILED";
+  }
+
+  await payment.save();
+  return payment;
+};
+
+const markPaymentByGatewayEvent = async ({ gatewayOrderId, gatewayPaymentId, status, signature, paidAt }) => {
+  let payment = null;
+
+  if (gatewayOrderId) {
+    payment = await Payment.findOne({ where: { gatewayOrderId } });
+  }
+
+  if (!payment && gatewayPaymentId) {
+    payment = await Payment.findOne({ where: { gatewayPaymentId } });
+  }
+
+  if (!payment) return null;
+
+  payment.status = status;
+  payment.gatewayPaymentId = gatewayPaymentId || payment.gatewayPaymentId;
+  payment.gatewaySignature = signature || payment.gatewaySignature;
+  payment.paidAt = status === "SUCCESS" ? paidAt || new Date() : payment.paidAt;
+  await payment.save();
+
+  if (status === "SUCCESS") {
+    await Booking.update(
+      { status: "PAID" },
+      { where: { id: payment.bookingId, status: ["REQUESTED", "ACCEPTED"] } }
+    );
+  }
+
+  return payment;
+};
+
+/**
+ * Log webhook (idempotent)
+ */
+const logWebhook = async ({ gateway, event, payload, status = "RECEIVED", idempotencyKey }) => {
   const finalIdempotencyKey =
     idempotencyKey || `${gateway}:${event}:${payload?.id || payload?.event_id || payload?.data?.order?.order_id || Date.now()}`;
+
+  const existing = await PaymentWebhookLog.findOne({ where: { idempotencyKey: finalIdempotencyKey } });
+  if (existing) return existing;
 
   return PaymentWebhookLog.create({
     gateway,
     eventType: event,
     payloadJson: JSON.stringify(payload || {}),
-    processed: status === 'PROCESSED',
+    processed: status === "PROCESSED",
     processingNote: status,
     idempotencyKey: finalIdempotencyKey,
   });
+};
+
+const markWebhookProcessed = async (logId, note = "PROCESSED") => {
+  await PaymentWebhookLog.update(
+    { processed: true, processingNote: note },
+    { where: { id: logId } }
+  );
 };
 
 /**
@@ -120,11 +122,14 @@ const getBookingPayments = async (bookingId) => {
   return Payment.findAll({
     where: { bookingId },
   });
->>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
 };
 
 module.exports = {
   initiatePayment,
+  getPaymentById,
   verifyPayment,
-  logWebhook
+  markPaymentByGatewayEvent,
+  logWebhook,
+  markWebhookProcessed,
+  getBookingPayments,
 };
