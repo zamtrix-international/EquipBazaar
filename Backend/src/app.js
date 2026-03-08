@@ -7,19 +7,28 @@ const { corsOptions } = require("./config/cors");
 const { rateLimiter } = require("./middlewares/rateLimit.middleware");
 const { errorHandler, notFoundHandler } = require("./middlewares/error.middleware");
 const { logger } = require("./utils/logger");
-
 const routes = require("./routes");
 
 const app = express();
 
+app.set("trust proxy", process.env.TRUST_PROXY === "true");
+
+const attachRawBodyForWebhooks = (req, res, buffer) => {
+  if (req.originalUrl.startsWith("/api/payment-webhooks/")) {
+    req.rawBody = buffer.toString("utf8");
+  }
+};
+
+// Security & basic middleware
 app.use(helmet());
 app.use(cors(corsOptions));
-
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: "2mb", verify: attachRawBodyForWebhooks }));
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting
 app.use(rateLimiter);
 
+// HTTP logs
 app.use(
   morgan("combined", {
     stream: {
@@ -28,6 +37,7 @@ app.use(
   })
 );
 
+// Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -36,14 +46,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-<<<<<<< HEAD
-/* ✅ FIX: ROUTES MOUNT */
-=======
 // API routes
->>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
 app.use("/api", routes);
 
-/* error handlers */
+// 404 + Error handler
 app.use(notFoundHandler);
 app.use(errorHandler);
 
