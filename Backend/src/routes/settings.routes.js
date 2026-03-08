@@ -1,44 +1,56 @@
 /**
  * Settings Routes
- * For gateway configuration and commission rules
+ * Admin configuration endpoints
  */
 
 const express = require("express");
 const router = express.Router();
 
+const settingsController = require("../controllers/settings.controller");
 const { auth } = require("../middlewares/auth.middleware");
 const { rbac } = require("../middlewares/rbac.middleware");
-
-/**
- * TODO: Add controllers for:
- * - Payment gateway configuration (Razorpay, Cashfree keys)
- * - App settings management
- * - Commission rules management
- * - System configuration
- */
+const { validate } = require("../middlewares/validate.middleware");
+const {
+  paymentGatewayQuerySchema,
+  upsertPaymentGatewayConfigSchema,
+  appSettingsQuerySchema,
+  upsertAppSettingSchema,
+} = require("../validations/settings.validation");
 
 // Get payment gateway config (admin only)
-router.get("/payment-gateway", auth, rbac("ADMIN"), (req, res) => {
-  // TODO: Implement
-  res.status(200).json({ message: "Payment gateway config" });
-});
+router.get(
+  "/payment-gateway",
+  auth,
+  rbac("ADMIN"),
+  validate(paymentGatewayQuerySchema, "query"),
+  settingsController.getPaymentGatewayConfig
+);
 
 // Update payment gateway config (admin only)
-router.put("/payment-gateway", auth, rbac("ADMIN"), (req, res) => {
-  // TODO: Implement
-  res.status(200).json({ message: "Payment gateway config updated" });
-});
+router.put(
+  "/payment-gateway",
+  auth,
+  rbac("ADMIN"),
+  validate(upsertPaymentGatewayConfigSchema),
+  settingsController.updatePaymentGatewayConfig
+);
 
 // Get app settings (admin only)
-router.get("/app", auth, rbac("ADMIN"), (req, res) => {
-  // TODO: Implement
-  res.status(200).json({ message: "App settings" });
-});
+router.get(
+  "/app",
+  auth,
+  rbac("ADMIN"),
+  validate(appSettingsQuerySchema, "query"),
+  settingsController.getAppSettings
+);
 
 // Update app settings (admin only)
-router.put("/app", auth, rbac("ADMIN"), (req, res) => {
-  // TODO: Implement
-  res.status(200).json({ message: "App settings updated" });
-});
+router.put(
+  "/app",
+  auth,
+  rbac("ADMIN"),
+  validate(upsertAppSettingSchema),
+  settingsController.updateAppSetting
+);
 
 module.exports = router;
