@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "nodemon Backend/src/server.js",
     "start": "node Backend/src/server.js",
-    "lint": "echo \"(optional) add eslint later\"",
+    "lint": "node --check Backend/src/app.js && node --check Backend/src/server.js && node --check Backend/src/routes/settings.routes.js && node --check Backend/src/controllers/settings.controller.js && node --check Backend/src/services/settings.service.js && node --check Backend/src/controllers/paymentWebhook.controller.js && node --check Backend/src/services/payment.service.js",
+    "test": "npm run lint",
     "migrate": "echo \"(optional) add sequelize-cli later\""
   },
   "engines": {
