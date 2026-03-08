@@ -12,7 +12,7 @@ router.use("/vendors", require("./vendor.routes"));
 router.use("/equipments", require("./equipment.routes"));
 router.use("/bookings", require("./booking.routes"));
 router.use("/payments", require("./payment.routes"));
-router.use("/payment-webhooks", require("./payment-webhook.routes"));
+router.use("/payment-webhooks", require("./paymentWebhook.routes"));
 router.use("/wallet", require("./wallet.routes"));
 router.use("/payouts", require("./payout.routes"));
 router.use("/reports", require("./report.routes"));
