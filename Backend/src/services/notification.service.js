@@ -2,26 +2,39 @@
  * Notification Service (Optional)
  * Handles email, SMS, and push notifications
  */
+const nodemailer = require("nodemailer");
+const { logger } = require("../utils/logger");
 
-const nodemailer = require('nodemailer');
-const logger = require('../utils/logger');
+const hasEmailConfig =
+  process.env.EMAIL_SERVICE &&
+  process.env.EMAIL_USER &&
+  process.env.EMAIL_PASSWORD &&
+  process.env.EMAIL_FROM;
 
-// Configure email transporter (update with your SMTP settings)
-const emailTransporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const emailTransporter = hasEmailConfig
+  ? nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    })
+  : null;
 
 /**
  * Send email notification
  */
-const sendEmailNotification = async (to, subject, template, data) => {
+const sendEmailNotification = async (to, subject, template, data = {}) => {
   try {
-    // TODO: Use template engine (EJS, Handlebars) to render HTML
-    const htmlContent = template; // Placeholder
+    if (!emailTransporter) {
+      logger.warn("Email transporter is not configured. Skipping email send.", {
+        to,
+        subject,
+      });
+      return { sent: false, reason: "email_not_configured" };
+    }
+
+    const htmlContent = typeof template === "function" ? template(data) : template;
 
     await emailTransporter.sendMail({
       from: process.env.EMAIL_FROM,
@@ -31,6 +44,7 @@ const sendEmailNotification = async (to, subject, template, data) => {
     });
 
     logger.info(`Email sent to ${to}`);
+    return { sent: true };
   } catch (error) {
     logger.error(`Email notification failed: ${error.message}`);
     throw error;
@@ -42,8 +56,8 @@ const sendEmailNotification = async (to, subject, template, data) => {
  */
 const sendSmsNotification = async (phoneNumber, message) => {
   try {
-    // TODO: Integrate with SMS provider (Twilio, AWS SNS, etc.)
-    logger.info(`SMS sent to ${phoneNumber}`);
+    logger.info(`SMS placeholder triggered for ${phoneNumber}`);
+    return { sent: false, reason: "sms_provider_not_configured" };
   } catch (error) {
     logger.error(`SMS notification failed: ${error.message}`);
     throw error;
@@ -53,10 +67,20 @@ const sendSmsNotification = async (phoneNumber, message) => {
 /**
  * Send push notification
  */
-const sendPushNotification = async (deviceToken, title, message, data = {}) => {
+const sendPushNotification = async (
+  deviceToken,
+  title,
+  message,
+  data = {}
+) => {
   try {
-    // TODO: Integrate with Firebase Cloud Messaging or similar
-    logger.info(`Push notification sent to device`);
+    logger.info("Push placeholder triggered", {
+      deviceToken,
+      title,
+      hasData: Boolean(data && Object.keys(data).length),
+    });
+
+    return { sent: false, reason: "push_provider_not_configured" };
   } catch (error) {
     logger.error(`Push notification failed: ${error.message}`);
     throw error;

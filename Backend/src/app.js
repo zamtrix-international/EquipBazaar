@@ -36,7 +36,11 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 /* ✅ FIX: ROUTES MOUNT */
+=======
+// API routes
+>>>>>>> 8b74ad53ef335469c8c895d0db8e151feed63729
 app.use("/api", routes);
 
 /* error handlers */

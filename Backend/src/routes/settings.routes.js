@@ -3,10 +3,11 @@
  * For gateway configuration and commission rules
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth.middleware');
-const rbac = require('../middlewares/rbac.middleware');
+
+const { auth } = require("../middlewares/auth.middleware");
+const { rbac } = require("../middlewares/rbac.middleware");
 
 /**
  * TODO: Add controllers for:
@@ -17,27 +18,27 @@ const rbac = require('../middlewares/rbac.middleware');
  */
 
 // Get payment gateway config (admin only)
-router.get('/payment-gateway', auth, rbac(['ADMIN']), (req, res) => {
+router.get("/payment-gateway", auth, rbac("ADMIN"), (req, res) => {
   // TODO: Implement
-  res.status(200).json({ message: 'Payment gateway config' });
+  res.status(200).json({ message: "Payment gateway config" });
 });
 
 // Update payment gateway config (admin only)
-router.put('/payment-gateway', auth, rbac(['ADMIN']), (req, res) => {
+router.put("/payment-gateway", auth, rbac("ADMIN"), (req, res) => {
   // TODO: Implement
-  res.status(200).json({ message: 'Payment gateway config updated' });
+  res.status(200).json({ message: "Payment gateway config updated" });
 });
 
 // Get app settings (admin only)
-router.get('/app', auth, rbac(['ADMIN']), (req, res) => {
+router.get("/app", auth, rbac("ADMIN"), (req, res) => {
   // TODO: Implement
-  res.status(200).json({ message: 'App settings' });
+  res.status(200).json({ message: "App settings" });
 });
 
 // Update app settings (admin only)
-router.put('/app', auth, rbac(['ADMIN']), (req, res) => {
+router.put("/app", auth, rbac("ADMIN"), (req, res) => {
   // TODO: Implement
-  res.status(200).json({ message: 'App settings updated' });
+  res.status(200).json({ message: "App settings updated" });
 });
 
 module.exports = router;

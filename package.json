@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "description": "Heavy equipment marketplace backend (React + Node/Express + MySQL) with bookings, payments (Razorpay/Cashfree), wallet, payouts, disputes, support, reports.",
-  "main": "src/server.js",
+  "main": "Backend/src/server.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "nodemon Backend/src/server.js",
+    "start": "node Backend/src/server.js",
     "lint": "echo \"(optional) add eslint later\"",
     "migrate": "echo \"(optional) add sequelize-cli later\""
   },
@@ -15,8 +15,10 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@cashfreepayments/cashfree-sdk": "^3.0.9",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cashfree-pg": "^5.0.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -28,6 +30,8 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.11.0",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.15",
+    "razorpay": "^2.9.6",
     "sequelize": "^6.37.3",
     "uuid": "^9.0.1",
     "winston": "^3.14.2"

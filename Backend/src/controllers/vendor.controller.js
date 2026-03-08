@@ -2,17 +2,21 @@
  * Vendor Controller
  * Handles vendor profile and KYC operations
  */
-
-const asyncHandler = require('../utils/asyncHandler');
-const vendorService = require('../services/vendor.service');
-const apiResponse = require('../utils/apiResponse');
+const { asyncHandler } = require("../utils/asyncHandler");
+const vendorService = require("../services/vendor.service");
+const { apiResponse } = require("../utils/apiResponse");
 
 /**
  * Create vendor profile
  */
 const createVendorProfile = asyncHandler(async (req, res) => {
   const vendor = await vendorService.createVendorProfile(req.user.id, req.body);
-  res.status(201).json(new apiResponse(201, vendor, 'Vendor profile created'));
+
+  return apiResponse(res, {
+    status: 201,
+    message: "Vendor profile created",
+    data: vendor,
+  });
 });
 
 /**
@@ -20,15 +24,28 @@ const createVendorProfile = asyncHandler(async (req, res) => {
  */
 const getVendorProfile = asyncHandler(async (req, res) => {
   const vendor = await vendorService.getVendorProfile(req.params.vendorId);
-  res.status(200).json(new apiResponse(200, vendor, 'Vendor profile retrieved'));
+
+  return apiResponse(res, {
+    status: 200,
+    message: "Vendor profile retrieved",
+    data: vendor,
+  });
 });
 
 /**
  * Update vendor profile
  */
 const updateVendorProfile = asyncHandler(async (req, res) => {
-  const vendor = await vendorService.updateVendorProfile(req.params.vendorId, req.body);
-  res.status(200).json(new apiResponse(200, vendor, 'Vendor profile updated'));
+  const vendor = await vendorService.updateVendorProfile(
+    req.params.vendorId,
+    req.body
+  );
+
+  return apiResponse(res, {
+    status: 200,
+    message: "Vendor profile updated",
+    data: vendor,
+  });
 });
 
 /**
@@ -36,7 +53,12 @@ const updateVendorProfile = asyncHandler(async (req, res) => {
  */
 const uploadKycDocument = asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).json(new apiResponse(400, null, 'No file uploaded'));
+    return apiResponse(res, {
+      status: 400,
+      success: false,
+      message: "No file uploaded",
+      data: null,
+    });
   }
 
   const kycDocument = await vendorService.uploadKycDocument(req.params.vendorId, {
@@ -44,15 +66,27 @@ const uploadKycDocument = asyncHandler(async (req, res) => {
     fileUrl: req.file.path,
   });
 
-  res.status(201).json(new apiResponse(201, kycDocument, 'KYC document uploaded'));
+  return apiResponse(res, {
+    status: 201,
+    message: "KYC document uploaded",
+    data: kycDocument,
+  });
 });
 
 /**
  * Add bank account
  */
 const addBankAccount = asyncHandler(async (req, res) => {
-  const bankAccount = await vendorService.addBankAccount(req.params.vendorId, req.body);
-  res.status(201).json(new apiResponse(201, bankAccount, 'Bank account added'));
+  const bankAccount = await vendorService.addBankAccount(
+    req.params.vendorId,
+    req.body
+  );
+
+  return apiResponse(res, {
+    status: 201,
+    message: "Bank account added",
+    data: bankAccount,
+  });
 });
 
 module.exports = {
