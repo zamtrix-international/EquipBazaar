@@ -9,14 +9,36 @@ const paymentService = require("../services/payment.service");
 const apiResponse = require("../utils/apiResponse");
 const logger = require("../utils/logger");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const isRazorpaySignatureValid = (rawBody, signature) => {
-  if (!process.env.RAZORPAY_WEBHOOK_SECRET) return true;
+  if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+    return !isProduction;
+  }
+
   if (!rawBody || !signature) return false;
 
   const expected = crypto
     .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
     .update(rawBody)
     .digest("hex");
+
+  if (expected.length !== String(signature).length) return false;
+
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(String(signature)));
+};
+
+const isCashfreeSignatureValid = (rawBody, signature) => {
+  if (!process.env.CASHFREE_WEBHOOK_SECRET) {
+    return !isProduction;
+  }
+
+  if (!rawBody || !signature) return false;
+
+  const expected = crypto
+    .createHmac("sha256", process.env.CASHFREE_WEBHOOK_SECRET)
+    .update(rawBody)
+    .digest("base64");
 
   if (expected.length !== String(signature).length) return false;
 
@@ -81,9 +103,15 @@ const handleRazorpayWebhook = asyncHandler(async (req, res) => {
  */
 const handleCashfreeWebhook = asyncHandler(async (req, res) => {
   const { type, data } = req.body;
+  const signature = req.headers["x-webhook-signature"];
   const orderId = data?.order?.order_id || data?.order_id;
   const paymentId = data?.payment?.cf_payment_id || data?.cf_payment_id;
   const idempotencyKey = `cashfree:${type}:${paymentId || orderId || "unknown"}`;
+
+  if (!isCashfreeSignatureValid(req.rawBody, signature)) {
+    logger.warn("Invalid Cashfree webhook signature", { idempotencyKey });
+    return res.status(400).json(apiResponse(400, null, "Invalid webhook signature"));
+  }
 
   const logEntry = await paymentService.logWebhook({
     gateway: "CASHFREE",
@@ -101,7 +129,7 @@ const handleCashfreeWebhook = asyncHandler(async (req, res) => {
     await paymentService.markPaymentByGatewayEvent({
       gatewayOrderId: orderId,
       gatewayPaymentId: paymentId,
-      signature: req.headers["x-webhook-signature"],
+      signature,
       status: "SUCCESS",
       paidAt: new Date(),
     });
@@ -111,7 +139,7 @@ const handleCashfreeWebhook = asyncHandler(async (req, res) => {
     await paymentService.markPaymentByGatewayEvent({
       gatewayOrderId: orderId,
       gatewayPaymentId: paymentId,
-      signature: req.headers["x-webhook-signature"],
+      signature,
       status: "FAILED",
     });
 
