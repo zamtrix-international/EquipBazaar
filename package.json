@@ -15,8 +15,10 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@cashfreepayments/cashfree-sdk": "^3.0.9",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cashfree-pg": "^5.0.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -29,6 +31,7 @@
     "mysql2": "^3.11.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.15",
+    "razorpay": "^2.9.6",
     "sequelize": "^6.37.3",
     "uuid": "^9.0.1",
     "winston": "^3.14.2"
