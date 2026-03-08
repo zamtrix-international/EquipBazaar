@@ -5,7 +5,6 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const paymentService = require('../services/payment.service');
-const bookingService = require('../services/booking.service');
 const apiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 
@@ -13,59 +12,42 @@ const logger = require('../utils/logger');
  * Handle Razorpay webhook
  */
 const handleRazorpayWebhook = asyncHandler(async (req, res) => {
-  try {
-    // Log webhook for audit
-    await paymentService.logWebhook({
-      gateway: 'RAZORPAY',
-      event: req.body.event,
-      payload: req.body,
-      status: 'RECEIVED',
-    });
+  const { event, payload } = req.body;
 
-    const { event, payload } = req.body;
+  await paymentService.logWebhook({
+    gateway: 'RAZORPAY',
+    event,
+    payload: req.body,
+    status: 'RECEIVED',
+    idempotencyKey: `razorpay:${event}:${payload?.payment?.entity?.id || req.headers['x-razorpay-event-id'] || Date.now()}`,
+  });
 
-    if (event === 'payment.authorized') {
-      // Handle successful payment
-      const paymentId = payload.payment.entity.id;
-      // TODO: Update payment status and booking
-    } else if (event === 'payment.failed') {
-      // Handle failed payment
-      logger.warn(`Payment failed: ${payload.payment.entity.id}`);
-    }
-
-    res.status(200).json(new apiResponse(200, null, 'Webhook processed'));
-  } catch (error) {
-    logger.error('Webhook processing error:', error);
-    res.status(500).json(new apiResponse(500, null, 'Webhook processing failed'));
+  if (event === 'payment.failed') {
+    logger.warn(`Payment failed: ${payload?.payment?.entity?.id || 'unknown'}`);
   }
+
+  return res.status(200).json(apiResponse(200, null, 'Webhook processed'));
 });
 
 /**
  * Handle Cashfree webhook
  */
 const handleCashfreeWebhook = asyncHandler(async (req, res) => {
-  try {
-    await paymentService.logWebhook({
-      gateway: 'CASHFREE',
-      event: req.body.type,
-      payload: req.body,
-      status: 'RECEIVED',
-    });
+  const { type, data } = req.body;
 
-    const { type, data } = req.body;
+  await paymentService.logWebhook({
+    gateway: 'CASHFREE',
+    event: type,
+    payload: req.body,
+    status: 'RECEIVED',
+    idempotencyKey: `cashfree:${type}:${data?.payment?.cf_payment_id || data?.order?.order_id || Date.now()}`,
+  });
 
-    if (type === 'PAYMENT_SUCCESS') {
-      // Handle successful payment
-    } else if (type === 'PAYMENT_FAILED') {
-      // Handle failed payment
-      logger.warn(`Payment failed: ${data.orderId}`);
-    }
-
-    res.status(200).json(new apiResponse(200, null, 'Webhook processed'));
-  } catch (error) {
-    logger.error('Webhook processing error:', error);
-    res.status(500).json(new apiResponse(500, null, 'Webhook processing failed'));
+  if (type === 'PAYMENT_FAILED') {
+    logger.warn(`Payment failed: ${data?.order?.order_id || 'unknown'}`);
   }
+
+  return res.status(200).json(apiResponse(200, null, 'Webhook processed'));
 });
 
 module.exports = {
