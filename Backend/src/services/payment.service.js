@@ -1,144 +1,169 @@
-/**
- * Payment Service
- * Handles payment operations, initiations, and verifications
- */
-
-const { UniqueConstraintError } = require("sequelize");
 const Payment = require("../models/Payment");
 const PaymentWebhookLog = require("../models/PaymentWebhookLog");
 const Booking = require("../models/Booking");
-const ApiError = require("../utils/apiError");
+
+const { ApiError } = require("../utils/apiError");
+const { makeIdempotencyKey } = require("../utils/idempotency");
+const { BOOKING_STATUS } = require("../constants/bookingStatus");
+
+const normalizeGateway = (gateway) => {
+  return String(gateway || "RAZORPAY").trim().toUpperCase();
+};
+
+const normalizeAmount = (amount) => {
+  const parsed = Number(amount);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new ApiError(400, "Invalid payment amount");
+  }
+
+  return Number(parsed.toFixed(2));
+};
 
 /**
- * Initiate payment
+ * Initiate Payment
  */
 const initiatePayment = async (bookingId, paymentData) => {
   const booking = await Booking.findByPk(bookingId);
+
   if (!booking) {
     throw new ApiError(404, "Booking not found");
   }
 
-  return Payment.create({
+  // ✅ ONLY allow when pending payment
+  if (booking.status !== BOOKING_STATUS.PENDING_PAYMENT) {
+    throw new ApiError(
+      400,
+      `Booking must be in PENDING_PAYMENT status, current: ${booking.status}`
+    );
+  }
+
+  const gateway = normalizeGateway(paymentData.gateway);
+  const amount = normalizeAmount(booking.totalAmount);
+
+  const idempotencyKey = makeIdempotencyKey(
+    `pay-${bookingId}-${paymentData.userId}-${gateway}`
+  );
+
+  // ✅ Prevent duplicate payment creation
+  const existing = await Payment.findOne({ where: { idempotencyKey } });
+
+  if (existing) {
+    return existing;
+  }
+
+  return await Payment.create({
     bookingId,
-    ...paymentData,
-    status: "PENDING",
+    gateway,
+    amount,
+    currency: "INR",
+    status: "CREATED",
+    idempotencyKey,
   });
 };
 
 /**
- * Get payment by ID
+ * Get Payment by ID
  */
 const getPaymentById = async (paymentId) => {
   const payment = await Payment.findByPk(paymentId);
+
   if (!payment) {
     throw new ApiError(404, "Payment not found");
   }
+
   return payment;
 };
 
 /**
- * Verify payment
+ * Get Payment by Razorpay Order ID
  */
-const verifyPayment = async (paymentId, gatewayResponse) => {
-  const payment = await getPaymentById(paymentId);
+const getPaymentByGatewayOrderId = async (gatewayOrderId) => {
+  const payment = await Payment.findOne({
+    where: { gatewayOrderId },
+  });
 
-  if (gatewayResponse.status === "SUCCESS") {
-    payment.status = "SUCCESS";
-    payment.gatewayPaymentId = gatewayResponse.paymentId || gatewayResponse.transactionId || payment.gatewayPaymentId;
-    payment.gatewaySignature = gatewayResponse.signature || payment.gatewaySignature;
-    payment.paidAt = new Date();
-
-    await Booking.update(
-      { status: "PAID" },
-      { where: { id: payment.bookingId, status: ["REQUESTED", "ACCEPTED"] } }
-    );
-  } else {
-    payment.status = "FAILED";
+  if (!payment) {
+    throw new ApiError(404, "Payment not found for this order");
   }
 
-  await payment.save();
   return payment;
 };
 
-const markPaymentByGatewayEvent = async ({ gatewayOrderId, gatewayPaymentId, status, signature, paidAt }) => {
-  let payment = null;
+/**
+ * Mark Payment Success
+ */
+const markPaymentSuccess = async (
+  gatewayOrderId,
+  gatewayPaymentId,
+  gatewaySignature
+) => {
+  const payment = await Payment.findOne({
+    where: { gatewayOrderId },
+  });
 
-  if (gatewayOrderId) {
-    payment = await Payment.findOne({ where: { gatewayOrderId } });
+  if (!payment) {
+    throw new ApiError(404, "Payment record not found");
   }
 
-  if (!payment && gatewayPaymentId) {
-    payment = await Payment.findOne({ where: { gatewayPaymentId } });
+  // ✅ Already processed
+  if (payment.status === "SUCCESS") {
+    return payment;
   }
+
+  payment.status = "SUCCESS";
+  payment.gatewayPaymentId =
+    gatewayPaymentId || payment.gatewayPaymentId;
+  payment.gatewaySignature =
+    gatewaySignature || payment.gatewaySignature;
+  payment.paidAt = payment.paidAt || new Date();
+
+  await payment.save();
+
+  return payment;
+};
+
+/**
+ * Mark Payment Failed
+ */
+const markPaymentFailed = async (gatewayOrderId) => {
+  const payment = await Payment.findOne({
+    where: { gatewayOrderId },
+  });
 
   if (!payment) return null;
 
-  payment.status = status;
-  payment.gatewayPaymentId = gatewayPaymentId || payment.gatewayPaymentId;
-  payment.gatewaySignature = signature || payment.gatewaySignature;
-  payment.paidAt = status === "SUCCESS" ? paidAt || new Date() : payment.paidAt;
-  await payment.save();
+  if (payment.status === "SUCCESS") return payment;
 
-  if (status === "SUCCESS") {
-    await Booking.update(
-      { status: "PAID" },
-      { where: { id: payment.bookingId, status: ["REQUESTED", "ACCEPTED"] } }
-    );
-  }
+  payment.status = "FAILED";
+  await payment.save();
 
   return payment;
 };
 
 /**
- * Log webhook (idempotent)
+ * Log Webhook (future use)
  */
-const logWebhook = async ({ gateway, event, payload, status = "RECEIVED", idempotencyKey }) => {
-  const finalIdempotencyKey =
-    idempotencyKey || `${gateway}:${event}:${payload?.id || payload?.event_id || payload?.data?.order?.order_id || Date.now()}`;
-
-  const existing = await PaymentWebhookLog.findOne({ where: { idempotencyKey: finalIdempotencyKey } });
-  if (existing) return existing;
-
-  try {
-    return await PaymentWebhookLog.create({
-      gateway,
-      eventType: event,
-      payloadJson: JSON.stringify(payload || {}),
-      processed: status === "PROCESSED",
-      processingNote: status,
-      idempotencyKey: finalIdempotencyKey,
-    });
-  } catch (error) {
-    if (error instanceof UniqueConstraintError) {
-      return PaymentWebhookLog.findOne({ where: { idempotencyKey: finalIdempotencyKey } });
-    }
-
-    throw error;
-  }
-};
-
-const markWebhookProcessed = async (logId, note = "PROCESSED") => {
-  await PaymentWebhookLog.update(
-    { processed: true, processingNote: note },
-    { where: { id: logId } }
-  );
+const logWebhook = async (webhookData) => {
+  return await PaymentWebhookLog.create(webhookData);
 };
 
 /**
- * Get booking payments
+ * Get all payments of a booking
  */
 const getBookingPayments = async (bookingId) => {
-  return Payment.findAll({
+  return await Payment.findAll({
     where: { bookingId },
+    order: [["createdAt", "DESC"]],
   });
 };
 
 module.exports = {
   initiatePayment,
   getPaymentById,
-  verifyPayment,
-  markPaymentByGatewayEvent,
+  getPaymentByGatewayOrderId,
+  markPaymentSuccess,
+  markPaymentFailed,
   logWebhook,
-  markWebhookProcessed,
   getBookingPayments,
 };

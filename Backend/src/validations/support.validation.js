@@ -2,16 +2,38 @@
  * Support Validation Schema
  */
 
-const { body, param, query } = require('express-validator');
+const { body, query } = require('express-validator');
 
 const createSupportTicketValidation = [
-  body('subject').notEmpty().isString().trim(),
-  body('description').notEmpty().isString().trim(),
-  body('category').notEmpty().isIn(['BOOKING', 'PAYMENT', 'DELIVERY', 'OTHER']),
+  body('subject')
+    .notEmpty()
+    .withMessage('subject is required')
+    .isString()
+    .trim(),
+
+  body('description')
+    .notEmpty()
+    .withMessage('description is required')
+    .isString()
+    .trim(),
+
+  body('category')
+    .optional()
+    .isIn(['BOOKING', 'PAYMENT', 'DELIVERY', 'KYC', 'TECH', 'OTHER'])
+    .withMessage('Invalid category'),
+
+  body('priority')
+    .optional()
+    .isIn(['LOW', 'MEDIUM', 'HIGH'])
+    .withMessage('Invalid priority'),
 ];
 
 const addTicketMessageValidation = [
-  body('message').notEmpty().isString().trim(),
+  body('message')
+    .notEmpty()
+    .withMessage('message is required')
+    .isString()
+    .trim(),
 ];
 
 const getUserTicketsValidation = [

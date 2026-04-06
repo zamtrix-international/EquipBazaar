@@ -1,81 +1,86 @@
-/**
- * Booking Status Service
- * Manages booking status transitions and validations
- */
+const { BOOKING_STATUS } = require("../constants/bookingStatus");
 
-const bookingStatusConstants = require('../constants/bookingStatus');
+const TRANSITIONS = {
+  [BOOKING_STATUS.PENDING_PAYMENT]: [
+    BOOKING_STATUS.PAID,
+    BOOKING_STATUS.ACCEPTED,
+    BOOKING_STATUS.ON_THE_WAY,
+    BOOKING_STATUS.WORK_STARTED,
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
 
-/**
- * Get allowed transitions for a booking status
- */
+  // Backward compatibility for old bookings
+  REQUESTED: [
+    BOOKING_STATUS.PAID,
+    BOOKING_STATUS.ACCEPTED,
+    BOOKING_STATUS.ON_THE_WAY,
+    BOOKING_STATUS.WORK_STARTED,
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
+
+  [BOOKING_STATUS.PAID]: [
+    BOOKING_STATUS.ACCEPTED,
+    BOOKING_STATUS.ON_THE_WAY,
+    BOOKING_STATUS.WORK_STARTED,
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
+
+  [BOOKING_STATUS.ACCEPTED]: [
+    BOOKING_STATUS.ON_THE_WAY,
+    BOOKING_STATUS.WORK_STARTED,
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
+
+  [BOOKING_STATUS.ON_THE_WAY]: [
+    BOOKING_STATUS.WORK_STARTED,
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
+
+  [BOOKING_STATUS.WORK_STARTED]: [
+    BOOKING_STATUS.DELIVERED,
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.DISPUTED,
+  ],
+
+  [BOOKING_STATUS.DELIVERED]: [
+    BOOKING_STATUS.COMPLETED,
+    BOOKING_STATUS.DISPUTED,
+    BOOKING_STATUS.CANCELLED,
+  ],
+
+  [BOOKING_STATUS.DISPUTED]: [
+    BOOKING_STATUS.COMPLETED,
+    BOOKING_STATUS.CANCELLED,
+  ],
+
+  [BOOKING_STATUS.COMPLETED]: [],
+  [BOOKING_STATUS.CANCELLED]: [],
+  [BOOKING_STATUS.REJECTED]: [],
+};
+
 const getAllowedTransitions = (currentStatus) => {
-  const transitions = {
-    [bookingStatusConstants.PENDING]: [
-      bookingStatusConstants.ACCEPTED,
-      bookingStatusConstants.REJECTED,
-      bookingStatusConstants.CANCELLED,
-    ],
-    [bookingStatusConstants.ACCEPTED]: [
-      bookingStatusConstants.PICKUP_SCHEDULED,
-      bookingStatusConstants.CANCELLED,
-    ],
-    [bookingStatusConstants.PICKUP_SCHEDULED]: [
-      bookingStatusConstants.PICKED_UP,
-      bookingStatusConstants.CANCELLED,
-    ],
-    [bookingStatusConstants.PICKED_UP]: [
-      bookingStatusConstants.DELIVERED,
-      bookingStatusConstants.CANCELLED,
-    ],
-    [bookingStatusConstants.DELIVERED]: [
-      bookingStatusConstants.RETURNED,
-      bookingStatusConstants.DISPUTED,
-    ],
-    [bookingStatusConstants.RETURNED]: [
-      bookingStatusConstants.COMPLETED,
-    ],
-    [bookingStatusConstants.DISPUTED]: [
-      bookingStatusConstants.RESOLVED,
-      bookingStatusConstants.REJECTED,
-    ],
-    [bookingStatusConstants.COMPLETED]: [],
-    [bookingStatusConstants.CANCELLED]: [],
-    [bookingStatusConstants.REJECTED]: [],
-  };
-
-  return transitions[currentStatus] || [];
+  return TRANSITIONS[currentStatus] || [];
 };
 
-/**
- * Validate status transition
- */
 const isValidTransition = (currentStatus, newStatus) => {
-  const allowed = getAllowedTransitions(currentStatus);
-  return allowed.includes(newStatus);
-};
+  if (currentStatus === newStatus) {
+    return true;
+  }
 
-/**
- * Get status display name
- */
-const getStatusDisplayName = (status) => {
-  const displayNames = {
-    [bookingStatusConstants.PENDING]: 'Pending Approval',
-    [bookingStatusConstants.ACCEPTED]: 'Accepted',
-    [bookingStatusConstants.REJECTED]: 'Rejected',
-    [bookingStatusConstants.PICKUP_SCHEDULED]: 'Pickup Scheduled',
-    [bookingStatusConstants.PICKED_UP]: 'Picked Up',
-    [bookingStatusConstants.DELIVERED]: 'Delivered',
-    [bookingStatusConstants.RETURNED]: 'Returned',
-    [bookingStatusConstants.COMPLETED]: 'Completed',
-    [bookingStatusConstants.CANCELLED]: 'Cancelled',
-    [bookingStatusConstants.DISPUTED]: 'Disputed',
-    [bookingStatusConstants.RESOLVED]: 'Resolved',
-  };
-  return displayNames[status] || status;
+  return getAllowedTransitions(currentStatus).includes(newStatus);
 };
 
 module.exports = {
   getAllowedTransitions,
   isValidTransition,
-  getStatusDisplayName,
 };

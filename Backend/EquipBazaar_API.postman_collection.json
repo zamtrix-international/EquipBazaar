@@ -1,0 +1,600 @@
+{
+  "info": {
+    "name": "EquipBazaar API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"P@ssword123\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"P@ssword123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/users/profile", "path": ["users", "profile"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/profile", "path": ["users", "profile"] }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/users", "path": ["users"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "item": [
+        {
+          "name": "Create Vendor Profile",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Example Vendor\",\n  \"address\": \"123 Main St\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/vendors", "path": ["vendors"] }
+          }
+        },
+        {
+          "name": "Get Vendor Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/vendors/:vendorId", "path": ["vendors", ":vendorId"] }
+          }
+        },
+        {
+          "name": "Update Vendor Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"address\": \"New Address\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vendors/:vendorId", "path": ["vendors", ":vendorId"] }
+          }
+        },
+        {
+          "name": "Upload KYC Document",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "document", "type": "file", "src": "/path/to/file.pdf" }] },
+            "url": { "raw": "{{baseUrl}}/vendors/:vendorId/kyc", "path": ["vendors", ":vendorId", "kyc"] }
+          }
+        },
+        {
+          "name": "Add Bank Account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"accountNumber\": \"111122223333\",\n  \"bankName\": \"My Bank\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vendors/:vendorId/bank-account", "path": ["vendors", ":vendorId", "bank-account"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Equipment",
+      "item": [
+        {
+          "name": "List Equipment",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipment", "path": ["equipment"] }
+          }
+        },
+        {
+          "name": "Create Equipment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Drill\",\n  \"price\": 100\n}" },
+            "url": { "raw": "{{baseUrl}}/equipment", "path": ["equipment"] }
+          }
+        },
+        {
+          "name": "Vendor Equipment",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/equipment/vendor/my-equipment", "path": ["equipment", "vendor", "my-equipment"] }
+          }
+        },
+        {
+          "name": "Get Equipment",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId", "path": ["equipment", ":equipmentId"] }
+          }
+        },
+        {
+          "name": "Update Equipment",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 120\n}" },
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId", "path": ["equipment", ":equipmentId"] }
+          }
+        },
+        {
+          "name": "Add Equipment Image",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "image", "type": "file", "src": "/path/to/image.jpg" }] },
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId/images", "path": ["equipment", ":equipmentId", "images"] }
+          }
+        },
+        {
+          "name": "Get Equipment Images",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId/images", "path": ["equipment", ":equipmentId", "images"] }
+          }
+        },
+        {
+          "name": "Delete Equipment Image",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId/images/:imageId", "path": ["equipment", ":equipmentId", "images", ":imageId"] }
+          }
+        },
+        {
+          "name": "Set Availability",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"availability\": [ { \"from\": \"2026-01-01\", \"to\": \"2026-01-05\" } ]\n}" },
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId/availability", "path": ["equipment", ":equipmentId", "availability"] }
+          }
+        },
+        {
+          "name": "Get Availability",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId/availability", "path": ["equipment", ":equipmentId", "availability"] }
+          }
+        },
+        {
+          "name": "Delete Equipment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/equipment/:equipmentId", "path": ["equipment", ":equipmentId"] }
+          }
+        },
+        {
+          "name": "Search Equipment",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/equipment/search?query=drill",
+              "path": ["equipment", "search"],
+              "query": [{ "key": "query", "value": "drill" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"equipmentId\": 1,\n  \"startDate\": \"2026-04-01\",\n  \"endDate\": \"2026-04-03\"\n}" },
+            "url": { "raw": "{{baseUrl}}/bookings", "path": ["bookings"] }
+          }
+        },
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings", "path": ["bookings"] }
+          }
+        },
+        {
+          "name": "Get Booking",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/:bookingId", "path": ["bookings", ":bookingId"] }
+          }
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"COMPLETED\"\n}" },
+            "url": { "raw": "{{baseUrl}}/bookings/:bookingId/status", "path": ["bookings", ":bookingId", "status"] }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/:bookingId/cancel", "path": ["bookings", ":bookingId", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1000,\n  \"currency\": \"INR\"\n}" },
+            "url": { "raw": "{{baseUrl}}/payments/:bookingId/initiate", "path": ["payments", ":bookingId", "initiate"] }
+          }
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"paymentId\": \"abc123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/payments/:paymentId/verify", "path": ["payments", ":paymentId", "verify"] }
+          }
+        },
+        {
+          "name": "Get Payment Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/payments/:paymentId", "path": ["payments", ":paymentId"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhook",
+      "item": [
+        {
+          "name": "Razorpay Webhook",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/webhook/razorpay", "path": ["webhook", "razorpay"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          }
+        },
+        {
+          "name": "Cashfree Webhook",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/webhook/cashfree", "path": ["webhook", "cashfree"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Commission",
+      "item": [
+        {
+          "name": "Get Commission Rule",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/commission/:vendorId", "path": ["commission", ":vendorId"] }
+          }
+        },
+        {
+          "name": "Update Commission Rule",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rate\": 0.1\n}" },
+            "url": { "raw": "{{baseUrl}}/commission/:vendorId", "path": ["commission", ":vendorId"] }
+          }
+        },
+        {
+          "name": "Calculate Commission",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/commission/:bookingId/calculate", "path": ["commission", ":bookingId", "calculate"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delivery",
+      "item": [
+        {
+          "name": "Confirm Pickup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "photos", "type": "file", "src": "/path/to/pickup.jpg" }] },
+            "url": { "raw": "{{baseUrl}}/delivery/:bookingId/confirm-pickup", "path": ["delivery", ":bookingId", "confirm-pickup"] }
+          }
+        },
+        {
+          "name": "Confirm Return",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "photos", "type": "file", "src": "/path/to/return.jpg" }] },
+            "url": { "raw": "{{baseUrl}}/delivery/:bookingId/confirm-return", "path": ["delivery", ":bookingId", "confirm-return"] }
+          }
+        },
+        {
+          "name": "Get Delivery Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/delivery/:bookingId/status", "path": ["delivery", ":bookingId", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disputes",
+      "item": [
+        {
+          "name": "Create Dispute",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Issue with equipment\"\n}" },
+            "url": { "raw": "{{baseUrl}}/dispute/:bookingId/dispute", "path": ["dispute", ":bookingId", "dispute"] }
+          }
+        },
+        {
+          "name": "Get Dispute",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/dispute/:disputeId", "path": ["dispute", ":disputeId"] }
+          }
+        },
+        {
+          "name": "Add Dispute Message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Please resolve quickly\"\n}" },
+            "url": { "raw": "{{baseUrl}}/dispute/:disputeId/message", "path": ["dispute", ":disputeId", "message"] }
+          }
+        },
+        {
+          "name": "Resolve Dispute",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/dispute/:disputeId/resolve", "path": ["dispute", ":disputeId", "resolve"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great equipment!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/review/:bookingId", "path": ["review", ":bookingId"] }
+          }
+        },
+        {
+          "name": "Get Equipment Reviews",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/review/equipment/:equipmentId", "path": ["review", "equipment", ":equipmentId"] } }
+        },
+        {
+          "name": "Get Vendor Reviews",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/review/vendor/:vendorId", "path": ["review", "vendor", ":vendorId"] } }
+        }
+      ]
+    },
+    {
+      "name": "Wallet & Payout",
+      "item": [
+        {
+          "name": "Get Wallet Balance",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/wallet/balance", "path": ["wallet", "balance"] }
+          }
+        },
+        {
+          "name": "Get Wallet Ledger",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/wallet/ledger", "path": ["wallet", "ledger"] }
+          }
+        },
+        {
+          "name": "Create Withdrawal Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 500\n}" },
+            "url": { "raw": "{{baseUrl}}/payouts/withdrawal-request", "path": ["payouts", "withdrawal-request"] }
+          }
+        },
+        {
+          "name": "Get Withdrawal Request",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/payouts/withdrawal-request/:requestId", "path": ["payouts", "withdrawal-request", ":requestId"] }
+          }
+        },
+        {
+          "name": "Get Vendor Payouts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/payouts", "path": ["payouts"] }
+          }
+        },
+        {
+          "name": "Process Withdrawal",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/payouts/withdrawal-request/:requestId/process", "path": ["payouts", "withdrawal-request", ":requestId", "process"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Generate Booking Report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/reports/booking", "path": ["reports", "booking"] }
+          }
+        },
+        {
+          "name": "Export Report",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"booking\"\n}" },
+            "url": { "raw": "{{baseUrl}}/reports/export", "path": ["reports", "export"] }
+          }
+        },
+        {
+          "name": "Get Export Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/reports/export/:exportId", "path": ["reports", "export", ":exportId"] }
+          }
+        },
+        {
+          "name": "List Vendor Reports",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/reports/list", "path": ["reports", "list"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings (Admin)",
+      "item": [
+        {
+          "name": "Get Payment Gateway Config",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/settings/payment-gateway", "path": ["settings", "payment-gateway"] }
+          }
+        },
+        {
+          "name": "Update Payment Gateway Config",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"provider\": \"razorpay\",\n  \"apiKey\": \"xxx\"\n}" },
+            "url": { "raw": "{{baseUrl}}/settings/payment-gateway", "path": ["settings", "payment-gateway"] }
+          }
+        },
+        {
+          "name": "Get App Settings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/settings/app", "path": ["settings", "app"] }
+          }
+        },
+        {
+          "name": "Update App Setting",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"siteName\",\n  \"value\": \"EquipBazaar\"\n}" },
+            "url": { "raw": "{{baseUrl}}/settings/app", "path": ["settings", "app"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "authToken", "value": "" }
+  ]
+}

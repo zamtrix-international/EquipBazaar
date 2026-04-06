@@ -1,11 +1,15 @@
 const PaymentGatewayConfig = require("../models/PaymentGatewayConfig");
 const AppSetting = require("../models/AppSetting");
-const ApiError = require("../utils/apiError");
+const { ApiError } = require("../utils/apiError");
 
 const maskSecret = (value) => {
   if (!value) return null;
-  if (value.length <= 6) return "******";
-  return `${value.slice(0, 3)}***${value.slice(-3)}`;
+
+  const str = String(value);
+
+  if (str.length <= 6) return "******";
+
+  return `${str.slice(0, 3)}***${str.slice(-3)}`;
 };
 
 const sanitizeGatewayConfig = (record) => ({
@@ -22,6 +26,7 @@ const sanitizeGatewayConfig = (record) => ({
 
 const getPaymentGatewayConfig = async ({ gateway } = {}) => {
   const where = gateway ? { gateway } : undefined;
+
   const rows = await PaymentGatewayConfig.findAll({
     ...(where ? { where } : {}),
     order: [["gateway", "ASC"]],
@@ -34,7 +39,14 @@ const getPaymentGatewayConfig = async ({ gateway } = {}) => {
   return rows.map(sanitizeGatewayConfig);
 };
 
-const upsertPaymentGatewayConfig = async ({ gateway, mode, isEnabled, apiKey, apiSecret, webhookSecret }, adminId) => {
+const upsertPaymentGatewayConfig = async (
+  { gateway, mode, isEnabled, apiKey, apiSecret, webhookSecret },
+  adminId
+) => {
+  if (!gateway) {
+    throw new ApiError(400, "gateway is required");
+  }
+
   const [row, created] = await PaymentGatewayConfig.findOrCreate({
     where: { gateway },
     defaults: {
@@ -60,11 +72,14 @@ const upsertPaymentGatewayConfig = async ({ gateway, mode, isEnabled, apiKey, ap
     });
   }
 
+  await row.reload();
+
   return sanitizeGatewayConfig(row);
 };
 
 const getAppSettings = async ({ keyName } = {}) => {
   const where = keyName ? { keyName } : undefined;
+
   const rows = await AppSetting.findAll({
     ...(where ? { where } : {}),
     order: [["keyName", "ASC"]],
@@ -75,6 +90,7 @@ const getAppSettings = async ({ keyName } = {}) => {
   }
 
   return rows.map((row) => ({
+    id: row.id,
     keyName: row.keyName,
     valueText: row.valueText,
     updatedByAdminId: row.updatedByAdminId,
@@ -83,6 +99,10 @@ const getAppSettings = async ({ keyName } = {}) => {
 };
 
 const upsertAppSetting = async ({ keyName, valueText }, adminId) => {
+  if (!keyName) {
+    throw new ApiError(400, "keyName is required");
+  }
+
   const [row, created] = await AppSetting.findOrCreate({
     where: { keyName },
     defaults: {
@@ -99,7 +119,10 @@ const upsertAppSetting = async ({ keyName, valueText }, adminId) => {
     });
   }
 
+  await row.reload();
+
   return {
+    id: row.id,
     keyName: row.keyName,
     valueText: row.valueText,
     updatedByAdminId: row.updatedByAdminId,

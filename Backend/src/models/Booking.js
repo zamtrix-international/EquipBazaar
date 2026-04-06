@@ -32,6 +32,7 @@ Booking.init(
       allowNull: false,
     },
 
+    // Core booking fields
     serviceDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
@@ -68,14 +69,58 @@ Booking.init(
       allowNull: true,
     },
 
-    // Money
-    subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
-    extraCharges: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
-    totalAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
+    // Frontend-friendly optional aliases / extra fields
+    startDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
 
-    commissionPct: { type: DataTypes.DECIMAL(5, 2), allowNull: false, defaultValue: 10 },
-    commissionAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
-    vendorNetAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
+    endDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
+    days: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+    },
+
+    // Money
+    subtotal: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+
+    extraCharges: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+
+    totalAmount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+
+    commissionPct: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      defaultValue: 10,
+    },
+
+    commissionAmount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+
+    vendorNetAmount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
 
     status: {
       type: DataTypes.ENUM(
@@ -94,15 +139,34 @@ Booking.init(
       defaultValue: "REQUESTED",
     },
 
-    requestedAt: { type: DataTypes.DATE, allowNull: true },
-    acceptedAt: { type: DataTypes.DATE, allowNull: true },
-    deliveredAt: { type: DataTypes.DATE, allowNull: true },
-    completedAt: { type: DataTypes.DATE, allowNull: true },
-    cancelledAt: { type: DataTypes.DATE, allowNull: true },
+    requestedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    acceptedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    deliveredAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    completedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    cancelledAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
 
     autoApproveAt: {
       type: DataTypes.DATE,
-      allowNull: true, // set when deliveredAt is set
+      allowNull: true,
     },
   },
   {

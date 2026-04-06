@@ -10,10 +10,13 @@ const { auth } = require("../middlewares/auth.middleware");
 const { rbac } = require("../middlewares/rbac.middleware");
 const { upload } = require("../middlewares/upload.middleware");
 
-// Create equipment
+// Public - Get all equipment
+router.get("/", equipmentController.getAllEquipment);
+
+// Vendor - Create equipment
 router.post("/", auth, rbac("VENDOR"), equipmentController.createEquipment);
 
-// Get vendor equipment
+// Vendor - Get own equipment list
 router.get(
   "/vendor/my-equipment",
   auth,
@@ -21,10 +24,10 @@ router.get(
   equipmentController.getVendorEquipment
 );
 
-// Get equipment
+// Public - Get single equipment details
 router.get("/:equipmentId", equipmentController.getEquipment);
 
-// Update equipment
+// Vendor - Update equipment
 router.put(
   "/:equipmentId",
   auth,
@@ -32,7 +35,7 @@ router.put(
   equipmentController.updateEquipment
 );
 
-// Add equipment image
+// Vendor - Add equipment image
 router.post(
   "/:equipmentId/images",
   auth,

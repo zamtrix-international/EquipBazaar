@@ -16,7 +16,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@cashfreepayments/cashfree-sdk": "^3.0.9",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cashfree-pg": "^5.0.6",

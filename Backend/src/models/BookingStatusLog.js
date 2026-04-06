@@ -5,9 +5,16 @@ class BookingStatusLog extends Model {}
 
 BookingStatusLog.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
 
-    bookingId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    bookingId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
 
     fromStatus: {
       type: DataTypes.STRING(30),
@@ -19,9 +26,15 @@ BookingStatusLog.init(
       allowNull: false,
     },
 
-    changedByUserId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    changedByUserId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
 
-    note: { type: DataTypes.STRING(255), allowNull: true },
+    note: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
   {
     sequelize,

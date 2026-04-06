@@ -1,0 +1,273 @@
+/* pages/Module/Login/Login.css */
+
+.login-container {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100%; /* हे add केले */
+}
+
+.login-box {
+  background: white;
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto; /* हे add केले */
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    max-width: 90%;
+    padding: 2rem;
+  }
+}
+
+.login-box h2 {
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  text-align: center; /* हे add केले - शीर्षक मध्यभागी */
+}
+
+.login-box p {
+  color: #666;
+  margin-bottom: 2rem;
+  text-align: center; /* हे add केले - सबटायटल मध्यभागी */
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  width: 100%; /* हे add केले */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  text-align: left; /* हे अगदी महत्त्वाचे - label डावीकडे */
+  width: 100%; /* हे add केले */
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  display: block; /* हे add केले */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 1rem;
+  display: block; /* हे add केले */
+}
+
+.login-btn:hover {
+  background: #e0a800;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 2rem;
+  color: #666;
+  width: 100%; /* हे add केले */
+}
+
+.signup-link a {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Error message styling (optional) */
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid #fcc;
+  width: 100%;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1rem;
+    min-height: calc(100vh - 120px);
+  }
+
+  .login-box {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .login-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .login-box p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.7rem;
+    font-size: 1rem;
+  }
+
+  .login-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-top: 0.8rem;
+  }
+
+  .signup-link {
+    font-size: 0.9rem;
+    margin-top: 1.5rem;
+  }
+
+  .error-message {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .login-container {
+    padding: 1.5rem;
+    min-height: calc(100vh - 140px);
+  }
+
+  .login-box {
+    max-width: 350px;
+    padding: 2.5rem;
+  }
+
+  .login-box h2 {
+    font-size: 1.8rem;
+  }
+
+  .login-box p {
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .login-btn {
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .login-box {
+    max-width: 420px;
+    padding: 3rem;
+  }
+
+  .login-box h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .login-container {
+    padding: 3rem 2rem;
+  }
+
+  .login-box {
+    max-width: 450px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .login-container {
+    padding: 4rem 3rem;
+  }
+
+  .login-box {
+    max-width: 500px;
+    padding: 4rem;
+  }
+
+  .login-box h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .login-box p {
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-group label {
+    font-size: 1.05rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .login-btn {
+    padding: 1.1rem;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+  }
+
+  .signup-link {
+    font-size: 1.05rem;
+  }
+}

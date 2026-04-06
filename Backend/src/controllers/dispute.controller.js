@@ -5,7 +5,7 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const disputeService = require('../services/dispute.service');
-const apiResponse = require('../utils/apiResponse');
+const { ApiResponse } = require('../utils/apiResponse');
 
 /**
  * Create dispute
@@ -13,10 +13,12 @@ const apiResponse = require('../utils/apiResponse');
 const createDispute = asyncHandler(async (req, res) => {
   const dispute = await disputeService.createDispute(req.params.bookingId, {
     ...req.body,
-    initiatedBy: req.user.id,
+    raisedByUserId: req.user.id,
   });
 
-  res.status(201).json(new apiResponse(201, dispute, 'Dispute created'));
+  res
+    .status(201)
+    .json(new ApiResponse(201, dispute, 'Dispute created'));
 });
 
 /**
@@ -24,7 +26,10 @@ const createDispute = asyncHandler(async (req, res) => {
  */
 const getDispute = asyncHandler(async (req, res) => {
   const dispute = await disputeService.getDispute(req.params.disputeId);
-  res.status(200).json(new apiResponse(200, dispute, 'Dispute retrieved'));
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, dispute, 'Dispute retrieved'));
 });
 
 /**
@@ -36,7 +41,9 @@ const addDisputeMessage = asyncHandler(async (req, res) => {
     userId: req.user.id,
   });
 
-  res.status(201).json(new apiResponse(201, message, 'Message added to dispute'));
+  res
+    .status(201)
+    .json(new ApiResponse(201, message, 'Message added to dispute'));
 });
 
 /**
@@ -45,10 +52,15 @@ const addDisputeMessage = asyncHandler(async (req, res) => {
 const resolveDispute = asyncHandler(async (req, res) => {
   const dispute = await disputeService.resolveDispute(
     req.params.disputeId,
-    req.body.resolution
+    {
+      resolutionNote: req.body.resolutionNote || req.body.resolution || null,
+      resolvedByAdminId: req.user.id,
+    }
   );
 
-  res.status(200).json(new apiResponse(200, dispute, 'Dispute resolved'));
+  res
+    .status(200)
+    .json(new ApiResponse(200, dispute, 'Dispute resolved'));
 });
 
 module.exports = {

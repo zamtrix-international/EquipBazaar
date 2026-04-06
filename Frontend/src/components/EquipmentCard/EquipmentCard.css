@@ -1,0 +1,254 @@
+.equipment-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.equipment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.equipment-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.equipment-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.equipment-card:hover .equipment-image img {
+  transform: scale(1.1);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.unavailable {
+  background: #dc3545;
+  color: white;
+}
+
+.equipment-details {
+  padding: 1rem 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-height: 245px;
+}
+
+.equipment-details h3 {
+  color: #111;
+  margin-bottom: 0.4rem;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  min-height: 46px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rating {
+  margin-bottom: 1rem;
+}
+
+.star {
+  color: #ddd;
+  font-size: 1.2rem;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.review-count {
+  color: #666;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.pricing {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hourly-rate {
+  color: #ffc107;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.daily-rate {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.vendor-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+  margin-bottom: 1rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.vendor-name, .location {
+  max-width: calc(50% - 0.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .equipment-image {
+    height: 150px;
+  }
+
+  .equipment-details {
+    padding: 1rem;
+  }
+
+  .equipment-details h3 {
+    font-size: 1rem;
+  }
+
+  .pricing {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .vendor-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .book-btn {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .equipment-image {
+    height: 180px;
+  }
+
+  .equipment-details {
+    padding: 1.2rem;
+  }
+
+  .equipment-details h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .equipment-image {
+    height: 200px;
+  }
+
+  .equipment-details {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .equipment-image {
+    height: 220px;
+  }
+
+  .equipment-details {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .equipment-image {
+    height: 250px;
+  }
+
+  .equipment-details {
+    padding: 2rem;
+  }
+
+  .equipment-details h3 {
+    font-size: 1.4rem;
+  }
+
+  .star {
+    font-size: 1.3rem;
+  }
+
+  .review-count {
+    font-size: 1rem;
+  }
+
+  .hourly-rate {
+    font-size: 1.2rem;
+  }
+
+  .daily-rate {
+    font-size: 1rem;
+  }
+
+  .vendor-info {
+    font-size: 1rem;
+  }
+
+  .book-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+}
+
+.book-btn {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: #ffb300;
+  color: #1a1a1a;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  margin-top: auto;
+}
+
+.book-btn:hover:not(.disabled) {
+  background: #ff9800;
+  transform: translateY(-1px);
+}
+
+.book-btn.disabled {
+  background: #e2e2e2;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.book-btn:hover:not(.disabled) {
+  background: #e0a800;
+}
+
+.book-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

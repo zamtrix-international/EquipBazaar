@@ -1,0 +1,150 @@
+.categories {
+  padding: 5rem 0;
+  background: white;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.category-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.category-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.category-card:hover img {
+  transform: scale(1.1);
+}
+
+.category-info {
+  padding: 1.5rem;
+}
+
+.category-info h3 {
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.category-price {
+  color: #ffc107;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.category-desc {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.category-btn {
+  background: none;
+  border: none;
+  color: #ffc107;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s;
+}
+
+.category-btn:hover {
+  color: #e0a800;
+}
+
+@media (max-width: 768px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .categories {
+    padding: 3rem 0;
+  }
+  
+  .category-info {
+    padding: 1rem;
+  }
+  
+  .category-info h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .categories {
+    padding: 2rem 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .categories {
+    padding: 4rem 0;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1440px) {
+  .categories {
+    padding: 6rem 0;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .category-card img {
+    height: 250px;
+  }
+  
+  .category-info {
+    padding: 2rem;
+  }
+  
+  .category-info h3 {
+    font-size: 1.5rem;
+  }
+  
+  .category-price {
+    font-size: 1.2rem;
+  }
+  
+  .category-desc {
+    font-size: 1rem;
+  }
+}

@@ -5,11 +5,26 @@ class WithdrawalRequest extends Model {}
 
 WithdrawalRequest.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
 
-    vendorId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    vendorId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
 
-    requestedAmount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+    bankAccountId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+
+    requestedAmount: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+    },
 
     status: {
       type: DataTypes.ENUM("PENDING", "APPROVED", "REJECTED", "PAID"),
@@ -17,10 +32,21 @@ WithdrawalRequest.init(
       defaultValue: "PENDING",
     },
 
-    requestedAt: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+    requestedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
 
-    reviewedByAdminId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
-    reviewNote: { type: DataTypes.STRING(255), allowNull: true },
+    reviewedByAdminId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+
+    reviewNote: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -30,6 +56,7 @@ WithdrawalRequest.init(
     indexes: [
       { fields: ["vendorId", "status"] },
       { fields: ["status"] },
+      { fields: ["bankAccountId"] },
     ],
   }
 );

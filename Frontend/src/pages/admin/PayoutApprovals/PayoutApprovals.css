@@ -1,0 +1,495 @@
+.payout-approvals-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 2rem 0;
+}
+
+.payout-approvals-page .container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.payout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.payout-header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 2rem;
+  color: #1a1a1a;
+}
+
+.payout-header p {
+  margin: 0;
+  color: #666;
+}
+
+.refresh-btn,
+.lookup-btn,
+.approve-btn,
+.details-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn {
+  background: #1f2937;
+  color: #fff;
+  padding: 0.8rem 1rem;
+}
+
+.refresh-btn:hover,
+.lookup-btn:hover,
+.approve-btn:hover,
+.details-btn:hover {
+  transform: translateY(-1px);
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.alert p {
+  margin: 0;
+}
+
+.alert-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #b42318;
+}
+
+.alert-success {
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  color: #027a48;
+}
+
+.info-banner {
+  background: #fff8db;
+  border: 1px solid #f8d36b;
+  color: #7a5a00;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.55;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card,
+.lookup-card,
+.requests-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem;
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-icon.total {
+  background: #fff3cd;
+  color: #b7791f;
+}
+
+.summary-icon.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.summary-icon.processing {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.summary-icon.amount {
+  background: #ecfdf3;
+  color: #047857;
+}
+
+.summary-label {
+  display: block;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1.45rem;
+  color: #111827;
+}
+
+.lookup-card,
+.requests-card {
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.lookup-card h2,
+.card-header h2 {
+  margin: 0 0 0.3rem;
+  color: #111827;
+}
+
+.lookup-card p {
+  margin: 0 0 1rem;
+  color: #6b7280;
+}
+
+.lookup-form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lookup-input {
+  flex: 1;
+  min-width: 240px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+}
+
+.lookup-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.lookup-btn {
+  background: #f59e0b;
+  color: #111827;
+  padding: 0.85rem 1.15rem;
+}
+
+.lookup-btn:disabled,
+.approve-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.card-header span {
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.requests-table th,
+.requests-table td {
+  padding: 0.9rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.requests-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.85rem;
+}
+
+.requests-table td {
+  color: #111827;
+  font-size: 0.92rem;
+}
+
+.requests-table tbody tr:hover {
+  background: #fffbeb;
+}
+
+.requests-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mono-text {
+  font-family: Consolas, 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.amount-cell {
+  font-weight: 700;
+  color: #047857;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-processing {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.details-btn {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  padding: 0.65rem 0.85rem;
+}
+
+.details-row td {
+  background: #fcfcfd;
+}
+
+.bank-details-panel {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.bank-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.bank-details-header h3 {
+  margin: 0 0 0.3rem;
+  color: #111827;
+}
+
+.bank-details-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.bank-accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.85rem;
+}
+
+.bank-account-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.95rem;
+}
+
+.bank-account-card.selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.14);
+}
+
+.bank-account-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.bank-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.mini-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mini-badge.selected {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bank-fields {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.bank-field {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.bank-field span {
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bank-field strong {
+  color: #111827;
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.details-note {
+  margin: 0.95rem 0 0;
+  padding: 0.8rem 0.9rem;
+  background: #fff8db;
+  border: 1px solid #f8d36b;
+  border-radius: 10px;
+  color: #7a5a00;
+  line-height: 1.5;
+}
+
+.details-empty {
+  padding: 0.8rem 0;
+  color: #6b7280;
+}
+
+.approve-btn {
+  background: #15803d;
+  color: #fff;
+  padding: 0.7rem 0.9rem;
+}
+
+.action-muted {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 2.25rem 1rem;
+  color: #6b7280;
+}
+
+.empty-state h3 {
+  margin: 1rem 0 0.35rem;
+  color: #111827;
+}
+
+.empty-state p,
+.loading-state p {
+  margin: 0;
+}
+
+.loading-state .spinner {
+  animation: spin 1s linear infinite;
+  color: #f59e0b;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .payout-header {
+    flex-direction: column;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+
+  .lookup-form {
+    flex-direction: column;
+  }
+
+  .lookup-input,
+  .lookup-btn,
+  .detail-approve-btn {
+    width: 100%;
+  }
+
+  .bank-details-header {
+    flex-direction: column;
+  }
+
+  .requests-table th,
+  .requests-table td {
+    white-space: nowrap;
+  }
+}

@@ -2,6 +2,7 @@
  * Vendor Controller
  * Handles vendor profile and KYC operations
  */
+
 const { asyncHandler } = require("../utils/asyncHandler");
 const vendorService = require("../services/vendor.service");
 const { apiResponse } = require("../utils/apiResponse");
@@ -28,6 +29,19 @@ const getVendorProfile = asyncHandler(async (req, res) => {
   return apiResponse(res, {
     status: 200,
     message: "Vendor profile retrieved",
+    data: vendor,
+  });
+});
+
+/**
+ * Get my vendor profile
+ */
+const getMyVendorProfile = asyncHandler(async (req, res) => {
+  const vendor = await vendorService.getMyVendorProfile(req.user.id);
+
+  return apiResponse(res, {
+    status: 200,
+    message: "My vendor profile retrieved",
     data: vendor,
   });
 });
@@ -62,7 +76,8 @@ const uploadKycDocument = asyncHandler(async (req, res) => {
   }
 
   const kycDocument = await vendorService.uploadKycDocument(req.params.vendorId, {
-    documentType: req.body.documentType,
+    docType: req.body.docType,
+    docNumber: req.body.docNumber || null,
     fileUrl: req.file.path,
   });
 
@@ -89,10 +104,43 @@ const addBankAccount = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Get my bank accounts
+ */
+const getMyBankAccounts = asyncHandler(async (req, res) => {
+  const bankAccounts = await vendorService.getMyBankAccounts(req.user.id);
+
+  return apiResponse(res, {
+    status: 200,
+    message: "My bank accounts retrieved",
+    data: bankAccounts,
+  });
+});
+
+/**
+ * Update my bank account
+ */
+const updateMyBankAccount = asyncHandler(async (req, res) => {
+  const bankAccount = await vendorService.updateMyBankAccount(
+    req.user.id,
+    req.params.bankAccountId,
+    req.body
+  );
+
+  return apiResponse(res, {
+    status: 200,
+    message: "My bank account updated",
+    data: bankAccount,
+  });
+});
+
 module.exports = {
   createVendorProfile,
   getVendorProfile,
+  getMyVendorProfile,
   updateVendorProfile,
   uploadKycDocument,
   addBankAccount,
+  getMyBankAccounts,
+  updateMyBankAccount,
 };

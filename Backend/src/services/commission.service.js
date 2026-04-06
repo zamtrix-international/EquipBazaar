@@ -8,26 +8,30 @@ const Booking = require('../models/Booking');
 const apiError = require('../utils/apiError');
 
 /**
- * Get commission rule
+ * Get global commission rule
  */
-const getCommissionRule = async (vendorId) => {
+const getCommissionRule = async () => {
   return await CommissionRule.findOne({
-    where: { vendorId },
+    where: { scope: 'GLOBAL' },
   });
 };
 
 /**
- * Create or update commission rule
+ * Create or update global commission rule
  */
-const upsertCommissionRule = async (vendorId, ruleData) => {
+const upsertCommissionRule = async ({ scope, commissionPct }) => {
   const [rule] = await CommissionRule.findOrCreate({
-    where: { vendorId },
-    defaults: ruleData,
+    where: { scope },
+    defaults: {
+      scope,
+      commissionPct,
+    },
   });
 
-  if (rule) {
-    await rule.update(ruleData);
-  }
+  await rule.update({
+    scope,
+    commissionPct,
+  });
 
   return rule;
 };
@@ -37,21 +41,22 @@ const upsertCommissionRule = async (vendorId, ruleData) => {
  */
 const calculateCommission = async (bookingId) => {
   const booking = await Booking.findByPk(bookingId);
+
   if (!booking) {
     throw new apiError(404, 'Booking not found');
   }
 
-  const rule = await getCommissionRule(booking.vendorId);
-  const commissionRate = rule ? rule.commissionRate : 0.1; // 10% default
-
-  const commission = booking.totalAmount * commissionRate;
+  const rule = await getCommissionRule();
+  const commissionPct = rule ? Number(rule.commissionPct) : 10;
+  const bookingAmount = Number(booking.totalAmount || 0);
+  const commission = (bookingAmount * commissionPct) / 100;
 
   return {
     bookingId,
     vendorId: booking.vendorId,
+    bookingAmount,
+    commissionPct,
     commission,
-    commissionRate: commissionRate * 100,
-    bookingAmount: booking.totalAmount,
   };
 };
 
@@ -60,6 +65,7 @@ const calculateCommission = async (bookingId) => {
  */
 const getAllCommissionRules = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
+
   return await CommissionRule.findAndCountAll({
     offset,
     limit,

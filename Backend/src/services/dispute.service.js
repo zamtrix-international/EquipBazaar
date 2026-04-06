@@ -1,26 +1,47 @@
 /**
  * Dispute Service
- * Handles dispute creation, investigation, and resolution
+ * Handles dispute creation and management
  */
 
 const Dispute = require('../models/Dispute');
 const DisputeMessage = require('../models/DisputeMessage');
-const DisputeAttachment = require('../models/DisputeAttachment');
 const Booking = require('../models/Booking');
-const apiError = require('../utils/apiError');
+const { ApiError } = require('../utils/apiError');
+
+/**
+ * Normalize dispute payload
+ */
+const normalizeDisputeData = (data = {}) => {
+  return {
+    raisedByUserId: data.raisedByUserId,
+    reasonCategory: data.reasonCategory || data.category || 'OTHER',
+    description: data.description,
+  };
+};
 
 /**
  * Create dispute
  */
 const createDispute = async (bookingId, disputeData) => {
   const booking = await Booking.findByPk(bookingId);
+
   if (!booking) {
-    throw new apiError(404, 'Booking not found');
+    throw new ApiError(404, 'Booking not found');
   }
+
+  const existingDispute = await Dispute.findOne({
+    where: { bookingId },
+  });
+
+  if (existingDispute) {
+    throw new ApiError(400, 'Dispute already exists for this booking');
+  }
+
+  const normalizedData = normalizeDisputeData(disputeData);
 
   return await Dispute.create({
     bookingId,
-    ...disputeData,
+    ...normalizedData,
   });
 };
 
@@ -28,48 +49,41 @@ const createDispute = async (bookingId, disputeData) => {
  * Get dispute
  */
 const getDispute = async (disputeId) => {
-  const dispute = await Dispute.findByPk(disputeId, {
-    include: [
-      { model: DisputeMessage, as: 'messages' },
-      { model: DisputeAttachment, as: 'attachments' },
-    ],
-  });
+  const dispute = await Dispute.findByPk(disputeId);
+
   if (!dispute) {
-    throw new apiError(404, 'Dispute not found');
+    throw new ApiError(404, 'Dispute not found');
   }
+
   return dispute;
 };
 
 /**
- * Add message to dispute
+ * Add dispute message
  */
 const addDisputeMessage = async (disputeId, messageData) => {
+  await getDispute(disputeId);
+
   return await DisputeMessage.create({
     disputeId,
-    ...messageData,
-  });
-};
-
-/**
- * Add attachment to dispute
- */
-const addDisputeAttachment = async (disputeId, attachmentData) => {
-  return await DisputeAttachment.create({
-    disputeId,
-    ...attachmentData,
+    senderUserId: messageData.userId,
+    message: messageData.message,
   });
 };
 
 /**
  * Resolve dispute
  */
-const resolveDispute = async (disputeId, resolution) => {
+const resolveDispute = async (disputeId, resolutionData) => {
   const dispute = await getDispute(disputeId);
-  await dispute.update({
-    status: 'RESOLVED',
-    resolution,
-    resolvedAt: new Date(),
-  });
+
+  dispute.status = 'RESOLVED';
+  dispute.resolutionNote = resolutionData.resolutionNote || null;
+  dispute.resolvedByAdminId = resolutionData.resolvedByAdminId || null;
+  dispute.resolvedAt = new Date();
+
+  await dispute.save();
+
   return dispute;
 };
 
@@ -77,6 +91,5 @@ module.exports = {
   createDispute,
   getDispute,
   addDisputeMessage,
-  addDisputeAttachment,
   resolveDispute,
 };

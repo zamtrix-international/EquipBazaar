@@ -16,6 +16,7 @@ Equipment.init(
       allowNull: false,
     },
 
+    // Core marketplace fields
     type: {
       type: DataTypes.ENUM("TRACTOR", "JCB", "CRANE", "DUMPER"),
       allowNull: false,
@@ -26,14 +27,35 @@ Equipment.init(
       allowNull: false,
     },
 
-    capacityLabel: {
+    hourlyRate: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+
+    // Extra frontend-friendly fields
+    name: {
+      type: DataTypes.STRING(160),
+      allowNull: true,
+    },
+
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    category: {
       type: DataTypes.STRING(80),
       allowNull: true,
     },
 
-    hourlyRate: {
+    dailyRate: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
+      allowNull: true,
+    },
+
+    capacityLabel: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
     },
 
     kmRate: {
@@ -95,6 +117,8 @@ Equipment.init(
     indexes: [
       { fields: ["vendorId"] },
       { fields: ["type", "city", "isActive", "isApproved"] },
+      { fields: ["category"] },
+      { fields: ["name"] },
     ],
   }
 );

@@ -17,7 +17,7 @@ router.post(
   deliveryController.confirmPickup
 );
 
-// Confirm return
+// Confirm return / customer approval / auto approval
 router.post(
   "/:bookingId/confirm-return",
   auth,

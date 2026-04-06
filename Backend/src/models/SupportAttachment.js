@@ -5,10 +5,21 @@ class SupportAttachment extends Model {}
 
 SupportAttachment.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
 
-    ticketId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
-    url: { type: DataTypes.STRING(500), allowNull: false },
+    ticketId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
+
+    url: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+    },
   },
   {
     sequelize,

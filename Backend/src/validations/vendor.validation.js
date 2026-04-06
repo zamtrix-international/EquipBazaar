@@ -1,35 +1,150 @@
 /**
- * Vendor Validation Schema
+ * Vendor Validation Schema (FINAL FIXED)
  */
 
 const { body, param } = require('express-validator');
 
+/**
+ * Create Vendor Profile
+ */
 const createVendorProfileValidation = [
-  body('companyName').notEmpty().isString().trim(),
-  body('description').optional().isString().trim(),
-  body('phoneNumber').notEmpty().isMobilePhone(),
-  body('address').notEmpty().isString().trim(),
-  body('city').notEmpty().isString().trim(),
-  body('state').notEmpty().isString().trim(),
-  body('pincode').notEmpty().isPostalCode('IN'),
+  body('businessName')
+    .notEmpty().withMessage('businessName is required')
+    .isString().trim(),
+
+  body('ownerName')
+    .notEmpty().withMessage('ownerName is required')
+    .isString().trim(),
+
+  body('address')
+    .optional()
+    .isString().trim(),
+
+  body('city')
+    .optional()
+    .isString().trim(),
 ];
 
+/**
+ * Update Vendor Profile
+ */
 const updateVendorProfileValidation = [
-  body('companyName').optional().isString().trim(),
-  body('description').optional().isString().trim(),
-  body('phoneNumber').optional().isMobilePhone(),
-  body('address').optional().isString().trim(),
+  body('businessName')
+    .optional()
+    .isString().trim(),
+
+  body('ownerName')
+    .optional()
+    .isString().trim(),
+
+  body('address')
+    .optional()
+    .isString().trim(),
+
+  body('city')
+    .optional()
+    .isString().trim(),
 ];
 
+/**
+ * Upload KYC Document
+ */
 const uploadKycDocumentValidation = [
-  body('documentType').notEmpty().isIn(['AADHAAR', 'PAN', 'BUSINESS_LICENSE']),
+  body('docType')
+    .notEmpty().withMessage('docType is required')
+    .isIn(['AADHAAR', 'PAN', 'DL', 'RC', 'OTHER'])
+    .withMessage('Invalid document type'),
+
+  body('docNumber')
+    .optional()
+    .isString()
+    .trim(),
 ];
 
+/**
+ * Add Bank Account
+ */
 const addBankAccountValidation = [
-  body('accountNumber').notEmpty().isString().trim(),
-  body('ifscCode').notEmpty().isString().trim().isLength({ min: 11, max: 11 }),
-  body('accountHolderName').notEmpty().isString().trim(),
-  body('bankName').notEmpty().isString().trim(),
+  body('accountHolderName')
+    .notEmpty().withMessage('accountHolderName is required')
+    .isString().trim(),
+
+  body('accountNumber')
+    .notEmpty().withMessage('accountNumber is required')
+    .isString().trim(),
+
+  body('ifsc')
+    .notEmpty().withMessage('ifsc is required')
+    .isString()
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .withMessage('Invalid IFSC code'),
+
+  body('bankName')
+    .optional()
+    .isString()
+    .trim(),
+
+  body('upiId')
+    .optional()
+    .isString()
+    .trim(),
+];
+
+/**
+ * Update My Bank Account
+ * At least one updatable field should be sent from frontend
+ */
+const updateMyBankAccountValidation = [
+  param('bankAccountId')
+    .notEmpty().withMessage('bankAccountId is required')
+    .isInt({ min: 1 }).withMessage('Invalid bankAccountId'),
+
+  body()
+    .custom((value) => {
+      const allowedFields = [
+        'accountHolderName',
+        'accountNumber',
+        'ifsc',
+        'bankName',
+        'upiId',
+      ];
+
+      const hasAtLeastOneField = allowedFields.some(
+        (field) => value[field] !== undefined
+      );
+
+      if (!hasAtLeastOneField) {
+        throw new Error('At least one bank account field is required');
+      }
+
+      return true;
+    }),
+
+  body('accountHolderName')
+    .optional()
+    .isString().trim(),
+
+  body('accountNumber')
+    .optional()
+    .isString().trim(),
+
+  body('ifsc')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .withMessage('Invalid IFSC code'),
+
+  body('bankName')
+    .optional()
+    .isString()
+    .trim(),
+
+  body('upiId')
+    .optional()
+    .isString()
+    .trim(),
 ];
 
 module.exports = {
@@ -37,4 +152,5 @@ module.exports = {
   updateVendorProfileValidation,
   uploadKycDocumentValidation,
   addBankAccountValidation,
+  updateMyBankAccountValidation,
 };

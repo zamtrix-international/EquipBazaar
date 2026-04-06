@@ -1,47 +1,52 @@
 /**
  * Wallet Controller
- * Handles wallet operations and balance management
  */
 
-const asyncHandler = require('../utils/asyncHandler');
-const walletService = require('../services/wallet.service');
-const apiResponse = require('../utils/apiResponse');
+const asyncHandler = require("../utils/asyncHandler");
+const { ApiError } = require("../utils/apiError");
+const { ApiResponse } = require("../utils/apiResponse");
+const walletService = require("../services/wallet.service");
 
-/**
- * Get wallet balance
- */
+const resolveVendorIdForWallet = async (req) => {
+  if (req.user.role === "VENDOR") {
+    return await walletService.resolveVendorIdFromUser(req.user.id);
+  }
+
+  if (req.user.role === "ADMIN") {
+    const vendorId = Number(req.query.vendorId || req.params.vendorId);
+
+    if (!vendorId) {
+      throw new ApiError(400, "vendorId is required for admin");
+    }
+
+    return vendorId;
+  }
+
+  throw new ApiError(403, "You are not allowed to access wallet");
+};
+
 const getWalletBalance = asyncHandler(async (req, res) => {
-  const balance = await walletService.getWalletBalance(req.user.id);
-  res.status(200).json(new apiResponse(200, { balance }, 'Wallet balance retrieved'));
+  const vendorId = await resolveVendorIdForWallet(req);
+  const balance = await walletService.getWalletBalance(vendorId);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, balance, "Wallet balance retrieved"));
 });
 
-/**
- * Get wallet ledger
- */
 const getWalletLedger = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-  const ledger = await walletService.getWalletLedger(req.user.id, page, limit);
-  res.status(200).json(new apiResponse(200, ledger, 'Wallet ledger retrieved'));
-});
+  const vendorId = await resolveVendorIdForWallet(req);
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.max(Number(req.query.limit) || 10, 1);
 
-/**
- * Add wallet funds
- */
-const addWalletFunds = asyncHandler(async (req, res) => {
-  const { amount, source } = req.body;
+  const ledger = await walletService.getWalletLedger(vendorId, page, limit);
 
-  const wallet = await walletService.addFunds(
-    req.user.id,
-    amount,
-    source,
-    req.body.reference
-  );
-
-  res.status(200).json(new apiResponse(200, wallet, 'Funds added to wallet'));
+  res
+    .status(200)
+    .json(new ApiResponse(200, ledger, "Wallet ledger retrieved"));
 });
 
 module.exports = {
   getWalletBalance,
   getWalletLedger,
-  addWalletFunds,
 };

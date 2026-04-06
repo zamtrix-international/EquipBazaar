@@ -1,0 +1,344 @@
+/* pages/customer/BookingSuccess/BookingSuccess.css */
+
+.success-page {
+  min-height: calc(100vh - 160px);
+  background: #f8f9fa;
+  padding: 3rem 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.success-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Header ── */
+.success-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.success-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #28a745, #20c060);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.35);
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.success-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.success-subtitle {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* ── Booking Details Card ── */
+.success-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.success-card-header {
+  background: #FFC107;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-id-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.booking-id-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  font-family: monospace;
+}
+
+.success-details {
+  padding: 1.25rem 1.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.7rem 0;
+  border-bottom: 1px dashed #e0e0e0;
+  gap: 1rem;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #666;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.payment-id-text {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #555;
+  word-break: break-all;
+  max-width: 220px;
+}
+
+.total-row {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid #e0e0e0 !important;
+  border-bottom: none !important;
+}
+
+.total-row .detail-label {
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.amount-value {
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  color: #E0A800 !important;
+}
+
+/* Badge */
+.payment-badge-row {
+  padding: 0.75rem 1.5rem 1.25rem;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-online {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.badge-cash {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* ── Next Steps ── */
+.next-steps {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid #e0e0e0;
+}
+
+.next-steps-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #FFC107;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: #FFC107;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: 0.25rem;
+}
+
+.step-text strong {
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.step-text span {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* ── Action Buttons ── */
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 1rem;
+  background: #FFC107;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.2px;
+}
+
+.btn-primary:hover {
+  background: #E0A800;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,193,7,0.4);
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 0.9rem;
+  background: transparent;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-secondary:hover {
+  border-color: #FFC107;
+  color: #1a1a1a;
+  background: #fffbeb;
+}
+
+/* ── No Data ── */
+.no-data {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.no-data h2 {
+  font-size: 1.4rem;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.no-data p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .success-page { padding: 1.5rem 0; }
+  .success-container { padding: 0 1rem; }
+  .success-title { font-size: 1.5rem; }
+  .success-icon { width: 72px; height: 72px; font-size: 2rem; }
+  .success-card-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+  .payment-id-text { max-width: 180px; }
+  .success-actions { gap: 0.5rem; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .success-page { background: #1a1a1a; }
+  .success-card, .next-steps { background: #2d2d2d; border-color: #404040; }
+  .success-card-header { background: #E0A800; }
+  .success-title, .detail-value, .next-steps-title, .step-text strong { color: #fff; }
+  .success-subtitle, .detail-label, .step-text span { color: #aaa; }
+  .detail-row { border-color: #404040; }
+  .btn-secondary { border-color: #444; color: #aaa; }
+  .btn-secondary:hover { background: #333; color: #fff; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .success-icon { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}

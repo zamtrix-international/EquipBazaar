@@ -5,27 +5,47 @@ class VendorWalletLedger extends Model {}
 
 VendorWalletLedger.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
 
-    vendorWalletId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    vendorWalletId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
 
     refType: {
       type: DataTypes.ENUM("BOOKING", "PAYOUT", "ADJUSTMENT", "PENALTY"),
       allowNull: false,
     },
 
-    refId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    refId: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
 
     entryType: {
       type: DataTypes.ENUM("CREDIT", "DEBIT"),
       allowNull: false,
     },
 
-    amount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+    amount: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+    },
 
-    description: { type: DataTypes.STRING(255), allowNull: true },
+    description: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
 
-    idempotencyKey: { type: DataTypes.STRING(100), allowNull: false, unique: true },
+    idempotencyKey: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
+    },
   },
   {
     sequelize,

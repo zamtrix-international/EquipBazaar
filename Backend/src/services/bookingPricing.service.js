@@ -1,35 +1,88 @@
-const { Equipment, CommissionRule } = require("../models");
+/**
+ * Booking Pricing Service
+ */
 
-const calculateBookingPrice = async (equipmentId, days, vendorId) => {
+const Equipment = require("../models/Equipment");
+const CommissionRule = require("../models/CommissionRule");
+const { ApiError } = require("../utils/apiError");
 
+const normalizeNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return fallback;
+  return num;
+};
+
+const calculateBookingPrice = async (equipmentId, estimatedHours, vendorId = null) => {
   const equipment = await Equipment.findByPk(equipmentId);
 
   if (!equipment) {
-    throw new Error("Equipment not found");
+    throw new ApiError(404, "Equipment not found");
   }
 
-  const basePrice = equipment.dailyRate * days;
+  // TEMPORARY RULE:
+  // booking allowed if equipment is active
+  // isApproved check removed for now
+  if (!equipment.isActive) {
+    throw new ApiError(400, "Equipment is not available for booking");
+  }
 
-  const rule = await CommissionRule.findOne({
-    where: { vendorId }
+  const resolvedVendorId = vendorId || equipment.vendorId;
+
+  const hoursInput = normalizeNumber(estimatedHours, 0);
+  const minimumHours = normalizeNumber(equipment.minimumHours, 1);
+  const hours = Math.max(hoursInput, minimumHours);
+
+  const hourlyRate = normalizeNumber(equipment.hourlyRate);
+  const kmRate = normalizeNumber(equipment.kmRate);
+  const basePrice = Number((hourlyRate * hours).toFixed(2));
+
+  let commissionPct = 10;
+
+  const globalCommissionRule = await CommissionRule.findOne({
+    where: { scope: "GLOBAL" },
   });
 
-  const commissionRate = rule ? rule.commissionRate : 0.1;
+  if (globalCommissionRule) {
+    commissionPct = normalizeNumber(globalCommissionRule.commissionPct, 10);
+  }
 
-  const commission = basePrice * commissionRate;
+  const commissionAmount = Number(
+    ((basePrice * commissionPct) / 100).toFixed(2)
+  );
 
-  const subtotal = basePrice + commission;
-
-  const gst = subtotal * 0.18;
+  const vendorNetAmount = Number(
+    (basePrice - commissionAmount).toFixed(2)
+  );
 
   return {
+    vendorId: resolvedVendorId,
+    hourlyRate,
+    kmRate,
+    estimatedHours: hours,
     basePrice,
-    commission,
-    gst,
-    totalAmount: subtotal + gst
+    commissionPct,
+    commissionAmount,
+    vendorNetAmount,
+    totalAmount: basePrice,
   };
 };
 
+const calculateKmCharges = (equipment, estimatedKm) => {
+  const kmRate = normalizeNumber(equipment?.kmRate);
+  const km = normalizeNumber(estimatedKm);
+
+  if (!kmRate || !km) return 0;
+
+  return Number((kmRate * km).toFixed(2));
+};
+
+const calculateTax = (amount) => {
+  const value = normalizeNumber(amount);
+  return Number((value * 0.18).toFixed(2));
+};
+
 module.exports = {
-  calculateBookingPrice
+  calculateBookingPrice,
+  calculateKmCharges,
+  calculateTax,
 };

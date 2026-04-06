@@ -5,14 +5,17 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const supportService = require('../services/support.service');
-const apiResponse = require('../utils/apiResponse');
+const { ApiResponse } = require('../utils/apiResponse');
 
 /**
  * Create support ticket
  */
 const createSupportTicket = asyncHandler(async (req, res) => {
-  const ticket = await supportService.createSupportTicket(req.user.id, req.body);
-  res.status(201).json(new apiResponse(201, ticket, 'Support ticket created'));
+  const ticket = await supportService.createSupportTicket(req.user, req.body);
+
+  res
+    .status(201)
+    .json(new ApiResponse(201, ticket, 'Support ticket created'));
 });
 
 /**
@@ -20,7 +23,10 @@ const createSupportTicket = asyncHandler(async (req, res) => {
  */
 const getSupportTicket = asyncHandler(async (req, res) => {
   const ticket = await supportService.getSupportTicket(req.params.ticketId);
-  res.status(200).json(new apiResponse(200, ticket, 'Support ticket retrieved'));
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, ticket, 'Support ticket retrieved'));
 });
 
 /**
@@ -28,20 +34,33 @@ const getSupportTicket = asyncHandler(async (req, res) => {
  */
 const getUserSupportTickets = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
-  const tickets = await supportService.getUserSupportTickets(req.user.id, page, limit);
-  res.status(200).json(new apiResponse(200, tickets, 'Support tickets retrieved'));
+
+  const tickets = await supportService.getUserSupportTickets(
+    req.user,
+    Number(page),
+    Number(limit)
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, tickets, 'Support tickets retrieved'));
 });
 
 /**
  * Add ticket message
  */
 const addTicketMessage = asyncHandler(async (req, res) => {
-  const message = await supportService.addTicketMessage(req.params.ticketId, {
-    ...req.body,
-    userId: req.user.id,
-  });
+  const message = await supportService.addTicketMessage(
+    req.params.ticketId,
+    {
+      message: req.body.message,
+      senderUserId: req.user.id,
+    }
+  );
 
-  res.status(201).json(new apiResponse(201, message, 'Message added to ticket'));
+  res
+    .status(201)
+    .json(new ApiResponse(201, message, 'Message added to ticket'));
 });
 
 /**
@@ -50,10 +69,13 @@ const addTicketMessage = asyncHandler(async (req, res) => {
 const closeTicket = asyncHandler(async (req, res) => {
   const ticket = await supportService.closeTicket(
     req.params.ticketId,
-    req.body.reason
+    req.body.reason,
+    req.user.id
   );
 
-  res.status(200).json(new apiResponse(200, ticket, 'Support ticket closed'));
+  res
+    .status(200)
+    .json(new ApiResponse(200, ticket, 'Support ticket closed'));
 });
 
 module.exports = {

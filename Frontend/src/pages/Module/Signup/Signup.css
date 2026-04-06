@@ -1,0 +1,261 @@
+.signup-container {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.signup-box {
+  background: white;
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+@media (max-width: 480px) {
+  .signup-box {
+    max-width: 90%;
+    padding: 2rem;
+  }
+}
+
+.signup-box h2 {
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+.signup-box p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 1rem;
+}
+
+.signup-btn:hover {
+  background: #e0a800;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 2rem;
+  color: #666;
+}
+
+.login-link a {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid #fcc;
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+  .signup-container {
+    padding: 1rem;
+    min-height: calc(100vh - 120px);
+  }
+
+  .signup-box {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .signup-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .signup-box p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.7rem;
+    font-size: 1rem;
+  }
+
+  .signup-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-top: 0.8rem;
+  }
+
+  .login-link {
+    font-size: 0.9rem;
+    margin-top: 1.5rem;
+  }
+
+  .error-message {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .signup-container {
+    padding: 1.5rem;
+    min-height: calc(100vh - 140px);
+  }
+
+  .signup-box {
+    max-width: 380px;
+    padding: 2rem;
+    border-radius: 8px;
+  }
+
+  .signup-box h2 {
+    font-size: 1.8rem;
+  }
+
+  .signup-box p {
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .signup-btn {
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .signup-box {
+    max-width: 450px;
+    padding: 2.5rem;
+  }
+
+  .signup-box h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .signup-container {
+    padding: 3rem 2rem;
+  }
+
+  .signup-box {
+    max-width: 500px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .signup-container {
+    padding: 4rem 3rem;
+  }
+
+  .signup-box {
+    max-width: 600px;
+    padding: 4rem;
+  }
+
+  .signup-box h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .signup-box p {
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-group label {
+    font-size: 1.05rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .signup-btn {
+    padding: 1.1rem;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+  }
+
+  .login-link {
+    font-size: 1.05rem;
+  }
+}

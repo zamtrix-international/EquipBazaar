@@ -5,34 +5,52 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const commissionService = require('../services/commission.service');
-const apiResponse = require('../utils/apiResponse');
+const { ApiResponse } = require('../utils/apiResponse');
 
 /**
- * Get commission rule
+ * Get global commission rule
  */
 const getCommissionRule = asyncHandler(async (req, res) => {
-  const rule = await commissionService.getCommissionRule(req.params.vendorId);
-  res.status(200).json(new apiResponse(200, rule, 'Commission rule retrieved'));
+  const rule = await commissionService.getCommissionRule();
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, rule, 'Global commission rule retrieved'));
 });
 
 /**
- * Update commission rule (admin only)
+ * Update global commission rule (admin only)
  */
 const updateCommissionRule = asyncHandler(async (req, res) => {
-  const rule = await commissionService.upsertCommissionRule(
-    req.params.vendorId,
-    req.body
-  );
+  const { commissionPct } = req.body;
 
-  res.status(200).json(new apiResponse(200, rule, 'Commission rule updated'));
+  if (commissionPct === undefined) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, 'commissionPct is required'));
+  }
+
+  const rule = await commissionService.upsertCommissionRule({
+    scope: 'GLOBAL',
+    commissionPct,
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, rule, 'Global commission updated'));
 });
 
 /**
  * Calculate commission for booking
  */
 const calculateCommission = asyncHandler(async (req, res) => {
-  const commission = await commissionService.calculateCommission(req.params.bookingId);
-  res.status(200).json(new apiResponse(200, commission, 'Commission calculated'));
+  const commission = await commissionService.calculateCommission(
+    req.params.bookingId
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, commission, 'Commission calculated'));
 });
 
 module.exports = {

@@ -10,6 +10,7 @@ const settingsController = require("../controllers/settings.controller");
 const { auth } = require("../middlewares/auth.middleware");
 const { rbac } = require("../middlewares/rbac.middleware");
 const { validate } = require("../middlewares/validate.middleware");
+
 const {
   paymentGatewayQuerySchema,
   upsertPaymentGatewayConfigSchema,
@@ -31,7 +32,7 @@ router.put(
   "/payment-gateway",
   auth,
   rbac("ADMIN"),
-  validate(upsertPaymentGatewayConfigSchema),
+  validate(upsertPaymentGatewayConfigSchema, "body"), // ✅ FIX
   settingsController.updatePaymentGatewayConfig
 );
 
@@ -49,7 +50,7 @@ router.put(
   "/app",
   auth,
   rbac("ADMIN"),
-  validate(upsertAppSettingSchema),
+  validate(upsertAppSettingSchema, "body"), // ✅ FIX
   settingsController.updateAppSetting
 );
 

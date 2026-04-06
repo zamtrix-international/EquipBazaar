@@ -5,7 +5,7 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const reviewService = require('../services/review.service');
-const apiResponse = require('../utils/apiResponse');
+const { ApiResponse } = require('../utils/apiResponse');
 
 /**
  * Create review
@@ -17,7 +17,9 @@ const createReview = asyncHandler(async (req, res) => {
     req.body
   );
 
-  res.status(201).json(new apiResponse(201, review, 'Review created'));
+  res
+    .status(201)
+    .json(new ApiResponse(201, review, 'Review created'));
 });
 
 /**
@@ -25,13 +27,16 @@ const createReview = asyncHandler(async (req, res) => {
  */
 const getEquipmentReviews = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
+
   const reviews = await reviewService.getEquipmentReviews(
     req.params.equipmentId,
-    page,
-    limit
+    Number(page),
+    Number(limit)
   );
 
-  res.status(200).json(new apiResponse(200, reviews, 'Equipment reviews retrieved'));
+  res
+    .status(200)
+    .json(new ApiResponse(200, reviews, 'Equipment reviews retrieved'));
 });
 
 /**
@@ -39,13 +44,16 @@ const getEquipmentReviews = asyncHandler(async (req, res) => {
  */
 const getVendorReviews = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
+
   const reviews = await reviewService.getVendorReviews(
     req.params.vendorId,
-    page,
-    limit
+    Number(page),
+    Number(limit)
   );
 
-  res.status(200).json(new apiResponse(200, reviews, 'Vendor reviews retrieved'));
+  res
+    .status(200)
+    .json(new ApiResponse(200, reviews, 'Vendor reviews retrieved'));
 });
 
 module.exports = {
