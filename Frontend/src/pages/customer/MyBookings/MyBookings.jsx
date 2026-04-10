@@ -382,9 +382,11 @@ const MyBookings = () => {
       return;
     }
 
-    if (!window.confirm('Do you approve this return and complete the booking?')) {
-      return;
-    }
+    const confirmed = await showConfirm(
+      'Do you approve this return and complete the booking?',
+      'Confirm Return'
+    );
+    if (!confirmed) return;
 
     setApprovingBookingId(bookingId);
 
@@ -421,7 +423,11 @@ const MyBookings = () => {
    * Cancel booking (only for PENDING_PAYMENT status)
    */
   const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    const confirmed = await showConfirm(
+      'Are you sure you want to cancel this booking?',
+      'Cancel Booking'
+    );
+    if (!confirmed) return;
 
     try {
       const response = await bookingAPI.updateStatus(bookingId, BOOKING_STATUSES.CANCELLED);
@@ -542,7 +548,7 @@ const MyBookings = () => {
               {bookings.map(booking => {
                 const bId = getBookingId(booking);
                 const isApproving = approvingBookingId === bId;
-                const showApproveReturn = isDelivered(booking) && !isCompleted(booking) && isPickupConfirmed(booking);
+                const showApproveReturn = isDelivered(booking) && !isCompleted(booking);
 
                 return (
                   <div key={bId} className="booking-card">
@@ -621,7 +627,7 @@ const MyBookings = () => {
                             <span>View Details</span>
                           </button>
 
-                          {/* MAIN BUTTON: Approve Return - only when status = DELIVERED */}
+                          {/* MAIN BUTTON: Confirm Return - only when status = DELIVERED */}
                           {showApproveReturn && (
                             <button
                               className="btn-approve"
@@ -631,12 +637,12 @@ const MyBookings = () => {
                               {isApproving ? (
                                 <>
                                   <Icons.Spinner />
-                                  <span>Approving...</span>
+                                  <span>Confirming...</span>
                                 </>
                               ) : (
                                 <>
                                   <Icons.CheckCircle />
-                                  <span>Approve Return</span>
+                                  <span>Confirm Return</span>
                                 </>
                               )}
                             </button>

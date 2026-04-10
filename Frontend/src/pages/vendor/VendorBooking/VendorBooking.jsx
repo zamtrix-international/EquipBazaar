@@ -1,4 +1,5 @@
 // pages/vendor/VendorBooking/VendorBooking.jsx
+
 import { useCallback, useEffect, useState } from 'react';
 import { bookingAPI, deliveryAPI } from '../../../services/api';
 import { showConfirm, showSuccess, showError, showInfo } from '../../../utils/sweetalert';
@@ -27,9 +28,8 @@ const STATUS_ACTIONS = {
 };
 
 // Return Status Actions for Vendor (Return Flow)
-// Simplified: Vendor only needs to confirm pickup once
 const RETURN_STATUS_ACTIONS = {
-  RETURN_REQUESTED: { label: 'Confirm Pickup', nextStatus: 'PICKUP_CONFIRMED' },
+  RETURN_REQUESTED: { label: 'Confirm Return Pickup', nextStatus: 'PICKUP_CONFIRMED' },
 };
 
 // Helper function to normalize status
@@ -84,13 +84,13 @@ const VendorBooking = () => {
   }, [fetchAllBookings]);
 
   // ========================================
-  // UPDATE BOOKING STATUS (Original Vendor Flow)
-  // Flow: PAID → ACCEPTED → ON_THE_WAY → WORK_STARTED → DELIVERED
+  // UPDATE BOOKING STATUS (Modified: Accept button calls both APIs)
+  // Flow: PAID → ACCEPTED (with confirm pickup)
   // ========================================
   const updateBookingStatus = async (bookingId, currentStatus) => {
     const normalizedStatus = normalizeStatus(currentStatus);
-
     const action = STATUS_ACTIONS[normalizedStatus];
+    
     if (!action) {
       await showInfo('No action available for this booking status', 'Information');
       return;
@@ -106,18 +106,57 @@ const VendorBooking = () => {
     }
 
     setUpdatingId(bookingId);
+    
     try {
-      const response = await bookingAPI.updateStatus(bookingId, action.nextStatus);
+      // ========================================
+      // SPECIAL HANDLING FOR ACCEPT BUTTON
+      // Accept button la: status update + confirm pickup API calls
+      // ========================================
+      if (normalizedStatus === BOOKING_STATUSES.PAID) {
+        // Step 1: Call confirm pickup API first
+        console.log('Calling confirm pickup API for booking:', bookingId);
+        
+        const pickupResponse = await deliveryAPI.confirmPickup(bookingId, {
+          confirmedBy: 'vendor',
+          confirmedAt: new Date().toISOString(),
+          notes: `Vendor confirmed pickup on ${new Date().toLocaleString()}`
+        });
 
-      if (response?.data?.success) {
+        if (!pickupResponse?.data?.success) {
+          throw new Error(pickupResponse?.data?.message || 'Pickup confirmation failed');
+        }
+
+        console.log('Confirm pickup response:', pickupResponse.data);
+        
+        // Step 2: Update status to ACCEPTED
+        console.log('Updating status to ACCEPTED for booking:', bookingId);
+        
+        const statusResponse = await bookingAPI.updateStatus(bookingId, action.nextStatus);
+
+        if (!statusResponse?.data?.success) {
+          throw new Error(statusResponse?.data?.message || 'Status update failed');
+        }
+
+        await showSuccess(
+          'Booking accepted and pickup confirmed successfully!',
+          'Success'
+        );
+      } 
+      // For other status updates (ON_THE_WAY, WORK_STARTED, DELIVERED)
+      else {
+        const response = await bookingAPI.updateStatus(bookingId, action.nextStatus);
+
+        if (!response?.data?.success) {
+          throw new Error(response?.data?.message || 'Status update failed');
+        }
+
         await showSuccess(
           `Booking ${action.label.toLowerCase()}ed successfully!`,
           'Success'
         );
-        await fetchAllBookings();
-      } else {
-        throw new Error(response?.data?.message || 'Status update failed');
       }
+      
+      await fetchAllBookings();
     } catch (err) {
       console.error('Error updating vendor booking status:', err);
       await showError(
@@ -131,10 +170,6 @@ const VendorBooking = () => {
 
   // ========================================
   // UPDATE RETURN STATUS (Return Flow)
-  // Flow: RETURN_REQUESTED → PICKUP_CONFIRMED (via deliveryAPI.confirmPickup)
-  // Then customer clicks "Approve Return" in MyBookings
-  // Customer approval calls deliveryAPI.confirmReturn()
-  // Result: Booking moves from DELIVERED → COMPLETED
   // ========================================
   const updateReturnStatus = async (bookingId, currentReturnStatus) => {
     const normalizedStatus = normalizeStatus(currentReturnStatus);
@@ -146,7 +181,7 @@ const VendorBooking = () => {
     }
 
     const confirmed = await showConfirm(
-      'Have you received the return request? Confirm pickup to allow customer return approval.',
+      'Have you received the return request? Confirm return pickup to allow customer return approval.',
       `Confirm ${action.label}`
     );
     
@@ -156,7 +191,6 @@ const VendorBooking = () => {
 
     setUpdatingId(bookingId);
     try {
-      // Vendor confirms pickup - this sets pickupDate in DeliveryConfirmation
       const response = await deliveryAPI.confirmPickup(bookingId, {
         confirmedBy: 'vendor',
         confirmedAt: new Date().toISOString(),
@@ -165,7 +199,7 @@ const VendorBooking = () => {
 
       if (response?.data?.success) {
         await showSuccess(
-          'Pickup confirmed! Customer can now approve the return.',
+          'Return pickup confirmed! Customer can now approve the return.',
           'Return Updated'
         );
         await showInfo(
@@ -221,24 +255,18 @@ const VendorBooking = () => {
     }
   };
 
-  // ========================================
-  // DERIVE RETURN FLOW STATUS FROM DELIVERY CONFIRMATION
-  // ========================================
   const getComputedReturnStatus = (booking) => {
     const confirmation = booking?.deliveryConfirmation;
     if (!confirmation) return null;
 
-    // If customer has approved, return is complete
     if (confirmation.customerApproved || confirmation.autoApproved) {
       return 'APPROVED_RETURN';
     }
 
-    // If vendor has confirmed pickup, customer can now approve
     if (confirmation.pickupDate) {
       return 'PICKUP_CONFIRMED';
     }
 
-    // If booking is delivered, vendor can confirm pickup
     if (String(booking?.status || '').toUpperCase() === 'DELIVERED') {
       return 'RETURN_REQUESTED';
     }
@@ -246,9 +274,6 @@ const VendorBooking = () => {
     return null;
   };
 
-  // ========================================
-  // GET RETURN STATUS DISPLAY NAME
-  // ========================================
   const getReturnStatusDisplayName = (returnStatus) => {
     if (!returnStatus) return 'No Return Request';
     
@@ -268,7 +293,6 @@ const VendorBooking = () => {
   const getButtonText = (status, isReturn = false) => {
     if (isReturn) {
       const normalizedStatus = normalizeStatus(status);
-      // Only show button for pickup confirmation step
       if (normalizedStatus === 'RETURN_REQUESTED') {
         return RETURN_STATUS_ACTIONS.RETURN_REQUESTED?.label;
       }
@@ -283,14 +307,13 @@ const VendorBooking = () => {
     if (isReturn) {
       if (!status) return false;
       const normalizedStatus = normalizeStatus(status);
-      return normalizedStatus === 'RETURN_REQUESTED'; // Only allow pickup confirmation
+      return normalizedStatus === 'RETURN_REQUESTED';
     }
     if (!status) return false;
     const normalizedStatus = normalizeStatus(status);
     return Boolean(STATUS_ACTIONS[normalizedStatus]);
   };
 
-  // Filter bookings that have active return requests
   const getReturnBookings = () => {
     return bookings.filter((booking) => {
       const returnStatus = getComputedReturnStatus(booking);
@@ -301,7 +324,6 @@ const VendorBooking = () => {
     });
   };
 
-  // Filter active bookings (without active returns)
   const getActiveBookings = () => {
     return bookings.filter((booking) => {
       const returnStatus = getComputedReturnStatus(booking);
@@ -400,7 +422,7 @@ const VendorBooking = () => {
       <div className="booking-header">
         <div className="booking-header-content">
           <h1 className="booking-title">📋 My Bookings</h1>
-          <p className="booking-subtitle">View and update booking & return status</p>
+          <p className="booking-subtitle">After acceptance, follow the delivery flow: On The Way → Start Work → Mark Delivered. Then customer confirms return to complete the order.</p>
         </div>
         <button className="refresh-btn" onClick={fetchAllBookings} disabled={loading}>
           🔄 Refresh

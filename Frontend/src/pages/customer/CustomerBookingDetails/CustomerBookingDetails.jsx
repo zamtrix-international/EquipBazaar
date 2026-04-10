@@ -101,7 +101,11 @@ const CustomerBookingDetails = () => {
   }, [fetchBooking]);
 
   const handleApproveReturn = async () => {
-    if (!window.confirm('Do you approve this return and complete the booking?')) return;
+    const confirmed = await showConfirm(
+      'Do you approve this return and complete the booking?',
+      'Confirm Return'
+    );
+    if (!confirmed) return;
 
     setApproving(true);
     try {
@@ -240,10 +244,7 @@ const CustomerBookingDetails = () => {
               <label>Total Amount:</label>
               <span>{formatCurrency(booking.totalAmount)}</span>
             </div>
-            <div className="payment-row secondary">
-              <label>Commission:</label>
-              <span>{booking.commissionPct}% ({formatCurrency(booking.commissionAmount)})</span>
-            </div>
+            {/* Commission section removed for customers */}
           </div>
 
           {/* Status Timeline */}
@@ -252,27 +253,18 @@ const CustomerBookingDetails = () => {
           </div>
 
           {/* Action Section */}
-          {isDelivered && !isCompleted && isPickupConfirmed && (
+          {isDelivered && !isCompleted && (
             <div className="section action-section">
               <div className="action-card">
                 <h3>Equipment Delivered</h3>
-                <p>The equipment has been delivered. Please inspect it and confirm the return.</p>
+                <p>The equipment has been delivered. Please inspect it and confirm the return to complete the booking.</p>
                 <button
                   onClick={handleApproveReturn}
                   disabled={approving}
                   className="btn-approve"
                 >
-                  {approving ? 'Approving...' : 'Approve & Complete Booking'}
+                  {approving ? 'Confirming...' : 'Confirm Return'}
                 </button>
-              </div>
-            </div>
-          )}
-
-          {!isCompleted && isDelivered && !isPickupConfirmed && (
-            <div className="section action-section">
-              <div className="action-card info">
-                <h3>Waiting for Vendor Pickup Confirmation</h3>
-                <p>The vendor must confirm pickup before you can approve the return.</p>
               </div>
             </div>
           )}

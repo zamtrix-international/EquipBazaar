@@ -277,7 +277,12 @@ const PayoutApprovals = () => {
     setMessage('');
 
     try {
-      const response = await payoutAPI.processWithdrawal(requestKey);
+      const referenceNo = `ADMIN-${requestKey}-${Date.now()}`;
+      const response = await payoutAPI.processWithdrawal(requestKey, {
+        transactionId: referenceNo,
+        referenceNo,
+        method: 'MANUAL',
+      });
       const updatedRequest = response?.data?.data || {};
 
       setRequests((prev) =>

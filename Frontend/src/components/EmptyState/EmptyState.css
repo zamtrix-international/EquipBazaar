@@ -1,0 +1,97 @@
+/* Empty State Styles */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  gap: 1rem;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #e5e7eb;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: #d1d5db;
+  display: block;
+}
+
+.empty-state-title {
+  color: #111827;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.empty-state-message {
+  color: #6b7280;
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.empty-state .btn {
+  margin-top: 1.5rem;
+}
+
+/* Error State Styles */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  gap: 1.5rem;
+  padding: 2rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 2px solid #fecaca;
+  text-align: center;
+}
+
+.error-state-icon {
+  font-size: 4rem;
+  color: #ef4444;
+  display: block;
+}
+
+.error-state-title {
+  color: #991b1b;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.error-state-message {
+  color: #7f1d1d;
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.error-state .btn {
+  margin-top: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .empty-state,
+  .error-state {
+    min-height: 250px;
+    padding: 1.5rem;
+  }
+
+  .empty-state-icon,
+  .error-state-icon {
+    font-size: 3rem;
+  }
+
+  .empty-state-title,
+  .error-state-title {
+    font-size: 1.125rem;
+  }
+}

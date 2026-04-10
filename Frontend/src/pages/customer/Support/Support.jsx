@@ -1,6 +1,7 @@
 // pages/customer/Support/Support.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supportAPI } from '../../../services/api';
+import { showConfirm, showSuccess, showError } from '../../../utils/sweetalert';
 import './Support.css';
 
 // Icon Components
@@ -44,6 +45,16 @@ const Icons = {
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M6.9 17.1l-2.82 2.82M17.1 6.9l2.82-2.82M4.93 19.07l2.83-2.83"></path>
     </svg>
+  ),
+  ChevronDown: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  ),
+  ChevronUp: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
   )
 };
 
@@ -52,18 +63,19 @@ const Support = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [expandedTicketId, setExpandedTicketId] = useState(null);
+  const [messages, setMessages] = useState({});
   const [newTicket, setNewTicket] = useState({
     subject: '',
-    category: 'booking',
-    priority: 'medium',
+    category: 'BOOKING',
+    priority: 'MEDIUM',
     message: ''
   });
   const [newMessage, setNewMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch tickets
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -71,7 +83,15 @@ const Support = () => {
       const response = await supportAPI.getMyTickets();
       
       if (response?.data?.success) {
-        const ticketsData = response.data.data?.tickets || response.data.data?.rows || response.data.data || [];
+        let ticketsData = response.data.data;
+        
+        // Handle different response structures
+        if (ticketsData?.rows) {
+          ticketsData = ticketsData.rows;
+        } else if (ticketsData?.tickets) {
+          ticketsData = ticketsData.tickets;
+        }
+        
         setTickets(Array.isArray(ticketsData) ? ticketsData : []);
       } else {
         throw new Error(response?.data?.message || 'Failed to fetch tickets');
@@ -83,18 +103,53 @@ const Support = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [fetchTickets]);
+
+  // Fetch single ticket details
+  const fetchTicketDetails = async (ticketId) => {
+    try {
+      const response = await supportAPI.getTicket(ticketId);
+      
+      if (response?.data?.success) {
+        const ticketData = response.data.data;
+        
+        // Update tickets list with latest data
+        setTickets(prev => prev.map(ticket => 
+          ticket.id === ticketId ? ticketData : ticket
+        ));
+        
+        // Store messages separately
+        if (ticketData.messages) {
+          setMessages(prev => ({ ...prev, [ticketId]: ticketData.messages }));
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching ticket details:', err);
+    }
+  };
+
+  // Toggle ticket expansion
+  const handleToggleTicket = async (ticketId) => {
+    if (expandedTicketId === ticketId) {
+      setExpandedTicketId(null);
+    } else {
+      setExpandedTicketId(ticketId);
+      if (!messages[ticketId]) {
+        await fetchTicketDetails(ticketId);
+      }
+    }
+  };
 
   // Create new ticket
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     
     if (!newTicket.subject.trim() || !newTicket.message.trim()) {
-      alert('Please fill in all required fields');
+      setError('Please fill in all required fields');
       return;
     }
 
@@ -105,11 +160,12 @@ const Support = () => {
       const response = await supportAPI.createTicket(newTicket);
       
       if (response?.data?.success) {
-        setTickets([response.data.data.ticket, ...tickets]);
+        const newTicketData = response.data.data;
+        setTickets(prev => [newTicketData, ...prev]);
         setNewTicket({
           subject: '',
-          category: 'booking',
-          priority: 'medium',
+          category: 'BOOKING',
+          priority: 'MEDIUM',
           message: ''
         });
         setShowNewTicketForm(false);
@@ -119,7 +175,7 @@ const Support = () => {
       }
     } catch (err) {
       console.error('Error creating ticket:', err);
-      setError(err.message || 'Failed to create ticket. Please try again.');
+      setError(err?.response?.data?.message || err.message || 'Failed to create ticket. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -134,8 +190,18 @@ const Support = () => {
       const response = await supportAPI.sendMessage(ticketId, { message: newMessage });
       
       if (response?.data?.success) {
+        const newMsg = response.data.data;
+        
+        // Update messages state
+        setMessages(prev => ({
+          ...prev,
+          [ticketId]: [...(prev[ticketId] || []), newMsg]
+        }));
+        
         setNewMessage('');
-        await fetchTickets(); // Refresh tickets
+        
+        // Refresh ticket list to update last message
+        await fetchTickets();
       } else {
         throw new Error(response?.data?.message || 'Failed to send message');
       }
@@ -149,17 +215,22 @@ const Support = () => {
 
   // Close ticket
   const handleCloseTicket = async (ticketId) => {
-    if (!window.confirm('Are you sure you want to close this ticket?')) return;
+    const confirmed = await showConfirm(
+      'Are you sure you want to close this ticket?',
+      'Close Ticket'
+    );
+    if (!confirmed) return;
 
     setSubmitting(true);
     try {
       const response = await supportAPI.closeTicket(ticketId);
       
       if (response?.data?.success) {
-        await fetchTickets(); // Refresh tickets
-        if (selectedTicket?.id === ticketId) {
-          setSelectedTicket(null);
+        await fetchTickets();
+        if (expandedTicketId === ticketId) {
+          setExpandedTicketId(null);
         }
+        alert('Support ticket closed successfully!');
       } else {
         throw new Error(response?.data?.message || 'Failed to close ticket');
       }
@@ -173,6 +244,7 @@ const Support = () => {
 
   // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const options = { 
       day: 'numeric', 
       month: 'short', 
@@ -185,23 +257,48 @@ const Support = () => {
 
   // Get status color
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'open': return 'var(--yellow-primary)';
-      case 'pending': return 'var(--yellow-dark)';
-      case 'closed': return 'var(--black-lighter)';
-      default: return 'var(--black-lighter)';
+    switch (status?.toUpperCase()) {
+      case 'OPEN': return '#ffc107';
+      case 'IN_PROGRESS': return '#17a2b8';
+      case 'RESOLVED': return '#28a745';
+      case 'CLOSED': return '#6c757d';
+      default: return '#6c757d';
+    }
+  };
+
+  // Get status text
+  const getStatusText = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'OPEN': return 'Open';
+      case 'IN_PROGRESS': return 'In Progress';
+      case 'RESOLVED': return 'Resolved';
+      case 'CLOSED': return 'Closed';
+      default: return status || 'Open';
     }
   };
 
   // Get priority color
   const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'low': return 'var(--yellow-light)';
-      case 'medium': return 'var(--yellow-primary)';
-      case 'high': return 'var(--yellow-dark)';
-      case 'urgent': return 'var(--yellow-dark)';
-      default: return 'var(--yellow-light)';
+    switch (priority?.toUpperCase()) {
+      case 'LOW': return '#28a745';
+      case 'MEDIUM': return '#ffc107';
+      case 'HIGH': return '#fd7e14';
+      case 'URGENT': return '#dc3545';
+      default: return '#6c757d';
     }
+  };
+
+  // Get category label
+  const getCategoryLabel = (category) => {
+    const categories = {
+      'PAYMENT': 'Payment Issue',
+      'BOOKING': 'Booking Issue',
+      'DELIVERY': 'Delivery Issue',
+      'KYC': 'KYC Verification',
+      'TECH': 'Technical Support',
+      'OTHER': 'Other'
+    };
+    return categories[category] || category;
   };
 
   // Loading state
@@ -241,7 +338,7 @@ const Support = () => {
           <div className="error-message">
             <Icons.AlertCircle />
             <span>{error}</span>
-            <button onClick={fetchTickets} className="retry-btn">Retry</button>
+            <button onClick={() => setError('')} className="error-close">×</button>
           </div>
         )}
 
@@ -250,19 +347,19 @@ const Support = () => {
           <form className="new-ticket-form" onSubmit={handleCreateTicket}>
             <h3>Create New Support Ticket</h3>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Subject <span className="required">*</span></label>
-                <input
-                  type="text"
-                  value={newTicket.subject}
-                  onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
-                  placeholder="Brief description of your issue"
-                  required
-                  className="form-input"
-                />
-              </div>
+            <div className="form-group">
+              <label>Subject <span className="required">*</span></label>
+              <input
+                type="text"
+                value={newTicket.subject}
+                onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
+                placeholder="Brief description of your issue"
+                required
+                className="form-input"
+              />
+            </div>
 
+            <div className="form-row">
               <div className="form-group">
                 <label>Category <span className="required">*</span></label>
                 <select
@@ -271,12 +368,12 @@ const Support = () => {
                   required
                   className="form-select"
                 >
-                  <option value="booking">Booking Issue</option>
-                  <option value="payment">Payment Issue</option>
-                  <option value="equipment">Equipment Problem</option>
-                  <option value="vendor">Vendor Issue</option>
-                  <option value="technical">Technical Support</option>
-                  <option value="other">Other</option>
+                  <option value="BOOKING">Booking Issue</option>
+                  <option value="PAYMENT">Payment Issue</option>
+                  <option value="DELIVERY">Delivery Issue</option>
+                  <option value="KYC">KYC Verification</option>
+                  <option value="TECH">Technical Support</option>
+                  <option value="OTHER">Other</option>
                 </select>
               </div>
 
@@ -288,10 +385,9 @@ const Support = () => {
                   required
                   className="form-select"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
                 </select>
               </div>
             </div>
@@ -346,25 +442,22 @@ const Support = () => {
           ) : (
             <div className="tickets-list">
               {tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className={`ticket-card ${selectedTicket?.id === ticket.id ? 'selected' : ''}`}
-                >
+                <div key={ticket.id} className="ticket-card">
                   {/* Ticket Header */}
                   <div 
                     className="ticket-header"
-                    onClick={() => setSelectedTicket(selectedTicket?.id === ticket.id ? null : ticket)}
+                    onClick={() => handleToggleTicket(ticket.id)}
                   >
                     <div className="ticket-info">
                       <h4>{ticket.subject}</h4>
                       <div className="ticket-meta">
                         <span className="ticket-id">#{ticket.id}</span>
-                        <span className="ticket-category">{ticket.category}</span>
+                        <span className="ticket-category">{getCategoryLabel(ticket.category)}</span>
                         <span
                           className="ticket-priority"
                           style={{ 
                             background: getPriorityColor(ticket.priority),
-                            color: ticket.priority === 'low' ? 'var(--black-primary)' : 'white'
+                            color: '#fff'
                           }}
                         >
                           {ticket.priority}
@@ -377,37 +470,60 @@ const Support = () => {
                         className="status-badge"
                         style={{ 
                           backgroundColor: getStatusColor(ticket.status),
-                          color: ticket.status === 'closed' ? 'white' : 'var(--black-primary)'
+                          color: '#fff'
                         }}
                       >
-                        {ticket.status}
+                        {getStatusText(ticket.status)}
                       </span>
                       <span className="ticket-date">
                         {formatDate(ticket.createdAt)}
                       </span>
+                      {expandedTicketId === ticket.id ? <Icons.ChevronUp /> : <Icons.ChevronDown />}
                     </div>
                   </div>
 
-                  {/* Ticket Details */}
-                  {selectedTicket?.id === ticket.id && (
+                  {/* Ticket Details (Expanded) */}
+                  {expandedTicketId === ticket.id && (
                     <div className="ticket-details">
+                      {/* Initial Description */}
+                      {ticket.description && (
+                        <div className="initial-description">
+                          <div className="message support-message">
+                            <div className="message-content">
+                              <div className="message-header">
+                                <span className="sender-name">You</span>
+                                <span className="message-time">{formatDate(ticket.createdAt)}</span>
+                              </div>
+                              <p>{ticket.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Messages */}
                       <div className="messages">
-                        {ticket.messages?.map((message) => (
+                        {(messages[ticket.id] || ticket.messages || []).map((message) => (
                           <div
                             key={message.id}
-                            className={`message ${message.sender === 'customer' ? 'customer' : 'support'}`}
+                            className={`message ${message.senderUserId === ticket.createdByUserId ? 'customer-message' : 'support-message'}`}
                           >
                             <div className="message-content">
+                              <div className="message-header">
+                                <span className="sender-name">
+                                  {message.senderUserId === ticket.createdByUserId ? 'You' : 'Support Team'}
+                                </span>
+                                <span className="message-time">
+                                  {formatDate(message.createdAt)}
+                                </span>
+                              </div>
                               <p>{message.message}</p>
-                              <span className="message-time">
-                                {formatDate(message.timestamp)}
-                              </span>
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      {ticket.status !== 'closed' && (
+                      {/* Reply Form (if ticket is not closed) */}
+                      {ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && (
                         <div className="reply-form">
                           <textarea
                             value={newMessage}
@@ -427,19 +543,20 @@ const Support = () => {
                             </button>
                             <button
                               onClick={() => handleSendMessage(ticket.id)}
-                              disabled={!newMessage.trim()}
+                              disabled={!newMessage.trim() || submitting}
                               className="send-btn"
                             >
-                              <Icons.Send />
+                              {submitting ? <Icons.Spinner /> : <Icons.Send />}
                               <span>Send Reply</span>
                             </button>
                           </div>
                         </div>
                       )}
 
-                      {ticket.status === 'closed' && (
+                      {/* Closed Ticket Message */}
+                      {(ticket.status === 'CLOSED' || ticket.status === 'RESOLVED') && (
                         <div className="closed-ticket-message">
-                          <p>This ticket is closed. You cannot reply anymore.</p>
+                          <p>This ticket is {ticket.status.toLowerCase()}. You cannot reply anymore.</p>
                         </div>
                       )}
                     </div>

@@ -1,91 +1,152 @@
-// utils/sweetalert.js
 import Swal from 'sweetalert2';
 
-// Custom alert function to replace window.alert
-export const showAlert = (message, type = 'info') => {
-  return Swal.fire({
-    title: type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info',
+// Global Theme Configuration
+const THEME_CONFIG = {
+  confirmButtonColor: '#3b82f6',
+  cancelButtonColor: '#ef4444',
+  allowOutsideClick: false,
+  allowEscapeKey: true,
+  backdrop: true,
+};
+
+// Create reusable instance
+const MySwal = Swal.mixin(THEME_CONFIG);
+
+// 🔹 General Alert
+export const showAlert = (message, type = 'info', title = null) => {
+  const titleText =
+    title || (type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Information');
+
+  return MySwal.fire({
+    title: titleText,
     text: message,
     icon: type,
     confirmButtonText: 'OK',
-    confirmButtonColor: '#3085d6',
   });
 };
 
-// Custom confirm function to replace window.confirm
+// 🔹 Confirm Dialog
 export const showConfirm = (message, title = 'Are you sure?') => {
-  return Swal.fire({
+  return MySwal.fire({
     title,
     text: message,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No',
+    confirmButtonText: 'Yes, confirm',
+    cancelButtonText: 'Cancel',
   }).then((result) => result.isConfirmed);
 };
 
-// Success alert
+// 🔹 Success Alert
 export const showSuccess = (message, title = 'Success!') => {
-  return Swal.fire({
+  return MySwal.fire({
     title,
     text: message,
     icon: 'success',
-    confirmButtonText: 'OK',
-    confirmButtonColor: '#28a745',
+    confirmButtonColor: '#10b981',
+    timer: 3000,
+    timerProgressBar: true,
   });
 };
 
-// Error alert
+// 🔹 Error Alert
 export const showError = (message, title = 'Error!') => {
-  return Swal.fire({
+  return MySwal.fire({
     title,
     text: message,
     icon: 'error',
-    confirmButtonText: 'OK',
-    confirmButtonColor: '#dc3545',
+    confirmButtonColor: '#ef4444',
   });
 };
 
-// Warning alert
+// 🔹 Warning Alert
 export const showWarning = (message, title = 'Warning!') => {
-  return Swal.fire({
+  return MySwal.fire({
     title,
     text: message,
     icon: 'warning',
-    confirmButtonText: 'OK',
-    confirmButtonColor: '#ffc107',
+    confirmButtonColor: '#f59e0b',
   });
 };
 
-// Info alert
-export const showInfo = (message, title = 'Info') => {
-  return Swal.fire({
+// 🔹 Info Alert
+export const showInfo = (message, title = 'Information') => {
+  return MySwal.fire({
     title,
     text: message,
     icon: 'info',
-    confirmButtonText: 'OK',
-    confirmButtonColor: '#17a2b8',
+    timer: 3000,
+    timerProgressBar: true,
   });
 };
 
-// Custom toast notifications
+// 🔹 Loading Alert
+export const showLoading = (message = 'Processing...') => {
+  Swal.fire({
+    title: message,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+};
+
+// 🔹 Close Loading
+export const closeLoading = () => {
+  Swal.close();
+};
+
+// 🔹 Custom Confirm (Advanced)
+export const showConfirmWithOptions = (options = {}) => {
+  const {
+    title = 'Are you sure?',
+    message = '',
+    confirmText = 'Yes, confirm',
+    cancelText = 'Cancel',
+    confirmColor = '#3b82f6',
+    cancelColor = '#ef4444',
+    icon = 'question',
+  } = options;
+
+  return MySwal.fire({
+    title,
+    text: message,
+    icon,
+    showCancelButton: true,
+    confirmButtonColor: confirmColor,
+    cancelButtonColor: cancelColor,
+    confirmButtonText: confirmText,
+    cancelButtonText: cancelText,
+  }).then((result) => result.isConfirmed);
+};
+
+// 🔹 Toast Notification
 export const showToast = (message, type = 'success') => {
   const Toast = Swal.mixin({
     toast: true,
-    position: 'top-end',
+    position: 'bottom-right',
     showConfirmButton: false,
-    timer: 3000,
+    timer: 2000,
     timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer);
-      toast.addEventListener('mouseleave', Swal.resumeTimer);
-    },
   });
 
   return Toast.fire({
     icon: type,
     title: message,
   });
+};
+
+// 🔹 Export All
+export default {
+  showAlert,
+  showConfirm,
+  showSuccess,
+  showError,
+  showWarning,
+  showInfo,
+  showLoading,
+  closeLoading,
+  showConfirmWithOptions,
+  showToast,
 };

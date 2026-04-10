@@ -1,7 +1,7 @@
 // pages/vendor/VendorDashboard/VendorDashboard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { equipmentAPI, bookingAPI, payoutAPI } from '../../../services/api';
+import { equipmentAPI, bookingAPI, payoutAPI, deliveryAPI } from '../../../services/api';
 import './VendorDashboard.css';
 
 // Icon Components
@@ -110,31 +110,31 @@ const VendorDashboard = () => {
       const newStatus = statusMap[action];
       const response = await bookingAPI.updateStatus(bookingId, newStatus);
 
-      if (response?.data?.success) {
-        // Update local state
-        setRecentBookings(prev => 
-          prev.map(b => 
-            b.id === bookingId 
-              ? { ...b, status: newStatus }
-              : b
-          )
-        );
-
-        // Update stats
-        if (action === 'accept') {
-          setStats(prev => ({
-            ...prev,
-            activeBookings: prev.activeBookings + 1,
-            pendingApprovals: prev.pendingApprovals - 1
-          }));
-        } else {
-          setStats(prev => ({
-            ...prev,
-            pendingApprovals: prev.pendingApprovals - 1
-          }));
-        }
-      } else {
+      if (!response?.data?.success) {
         throw new Error(response?.data?.message || `Failed to ${action} booking`);
+      }
+
+      // Update local state
+      setRecentBookings(prev => 
+        prev.map(b => 
+          b.id === bookingId 
+            ? { ...b, status: newStatus }
+            : b
+        )
+      );
+
+      // Update stats
+      if (action === 'accept') {
+        setStats(prev => ({
+          ...prev,
+          activeBookings: prev.activeBookings + 1,
+          pendingApprovals: prev.pendingApprovals - 1
+        }));
+      } else {
+        setStats(prev => ({
+          ...prev,
+          pendingApprovals: prev.pendingApprovals - 1
+        }));
       }
     } catch (err) {
       console.error(`Error ${action}ing booking:`, err);

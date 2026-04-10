@@ -1,7 +1,8 @@
 // pages/vendor/Earnings/Earnings.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { payoutAPI, vendorAPI } from '../../../services/api';
+import { payoutAPI, vendorAPI, walletAPI } from '../../../services/api';
+import { showConfirm, showSuccess, showError } from '../../../utils/sweetalert';
 import './Earnings.css';
 
 // Icon Components
@@ -76,10 +77,11 @@ const Earnings = () => {
     setError('');
 
     try {
-      const [payoutsRes, bankAccountsRes, withdrawalRequestsRes] = await Promise.all([
+      const [payoutsRes, bankAccountsRes, withdrawalRequestsRes, walletBalanceRes] = await Promise.all([
         payoutAPI.getPayouts({ page: 1, limit: 100 }),
         vendorAPI.getMyBankAccounts(),
-        payoutAPI.getWithdrawalRequests().catch(() => ({ data: { success: true, data: { requests: [] } } }))
+        payoutAPI.getWithdrawalRequests().catch(() => ({ data: { success: true, data: { requests: [] } } })),
+        walletAPI.getBalance().catch(() => ({ data: { success: true, data: { availableBalance: 0, lifetimeEarnings: 0, pendingBalance: 0 } } })),
       ]);
 
       const payouts =
@@ -97,7 +99,13 @@ const Earnings = () => {
         withdrawalRequestsRes?.data?.data?.rows ||
         [];
 
-      const total = payouts.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const walletBalance = walletBalanceRes?.data?.data || {};
+      const availableFromWallet = Number(walletBalance.availableBalance ?? 0);
+      const lifetimeEarnings = Number(walletBalance.lifetimeEarnings ?? 0);
+
+      const total = Number.isFinite(lifetimeEarnings)
+        ? lifetimeEarnings
+        : payouts.reduce((sum, item) => sum + Number(item.amount || 0), 0);
       const withdrawn = payouts
         .filter((item) => ['processed', 'completed', 'withdrawn', 'paid'].includes(String(item.status || '').toLowerCase()))
         .reduce((sum, item) => sum + (item.amount || 0), 0);
@@ -133,7 +141,9 @@ const Earnings = () => {
         thisMonth,
         pending,
         withdrawn,
-        available: Math.max(0, total - withdrawn - pendingFromRequests)
+        available: Number.isFinite(availableFromWallet)
+          ? availableFromWallet
+          : Math.max(0, total - withdrawn - pending),
       });
 
       setTransactions(payouts);
@@ -153,7 +163,12 @@ const Earnings = () => {
 
   // Handle withdraw
   const handleWithdraw = async () => {
-    const availableAmount = earnings.available;
+    const availableAmount = Number(earnings.available);
+
+    if (!Number.isFinite(availableAmount)) {
+      alert('Unable to withdraw because available balance is invalid. Please refresh and try again.');
+      return;
+    }
 
     if (!selectedBankAccountId) {
       alert('Please add and select a bank account before requesting a withdrawal');
@@ -177,7 +192,11 @@ const Earnings = () => {
       ? `${selectedBankAccount.bankName || 'Bank account'} ending ${String(selectedBankAccount.accountNumber || '').slice(-4)}`
       : 'your selected bank account';
 
-    if (!window.confirm(`Are you sure you want to withdraw ₹${availableAmount.toLocaleString('en-IN')} to ${bankLabel}?`)) {
+    const confirmed = await showConfirm(
+      `Withdraw ₹${availableAmount.toLocaleString('en-IN')} to ${bankLabel}?`,
+      'Confirm Withdrawal'
+    );
+    if (!confirmed) {
       return;
     }
 
